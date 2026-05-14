@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Annotation Kit & Decision Trees — Mali</title>
+  <meta name="description" content="How Mali designed an annotation kit and decision trees to enable 20+ UX designers at Verily to complete accessibility annotations independently." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — shared with index.html
+    ============================================================ */
+    :root {
+      --opal-teal:        #2BBFA0;
+      --opal-rose:        #D95F8A;
+      --opal-gold:        #C8860A;
+      --opal-violet:      #6B4FCC;
+      --opal-sky:         #3A9ED9;
+      --opal-teal-dark:   #1A7A68;
+      --opal-rose-dark:   #A33A65;
+      --opal-gold-dark:   #8A5C06;
+      --opal-violet-dark: #4A35A0;
+      --opal-sky-dark:    #1B6FA8;
+
+      --ink:          #111111;
+      --ink-secondary:#444444;
+      --ink-muted:    #666666;
+      --surface:      #FFFFFF;
+      --surface-soft: #F7F7F5;
+      --border:       rgba(0,0,0,0.10);
+      --border-strong:rgba(0,0,0,0.20);
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+
+      --max-w:      1100px;
+      --prose-w:    680px;
+      --gap:        clamp(1.5rem, 4vw, 3rem);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; }
+    ul, ol { list-style: none; }
+
+    /* ============================================================
+       SKIP LINK
+    ============================================================ */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--ink);
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0 0 6px 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 9999;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0; outline: 3px solid var(--opal-teal); outline-offset: 2px; }
+
+    /* ============================================================
+       FOCUS STYLES
+    ============================================================ */
+    :focus-visible {
+      outline: 3px solid var(--opal-violet);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    /* ============================================================
+       HEADER / NAV — identical to index
+    ============================================================ */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--gap);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .wordmark {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .wordmark .mali-m {
+      background: linear-gradient(135deg, var(--opal-violet) 0%, var(--opal-teal) 50%, var(--opal-rose) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .primary-nav { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-link {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--ink-secondary);
+      text-decoration: none;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--surface-soft); }
+    .nav-link[aria-current="page"] { color: var(--ink); font-weight: 500; }
+    .nav-link[aria-current="page"]::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 0.85rem;
+      right: 0.85rem;
+      height: 2px;
+      background: var(--opal-teal);
+      border-radius: 2px;
+    }
+    .nav-cta {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 0.45rem 1rem;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      margin-left: 0.5rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover, .nav-cta:focus-visible { background: var(--ink); color: var(--surface); }
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: var(--ink);
+      border-radius: 6px;
+    }
+    .menu-btn:focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; }
+    .hamburger-icon { display: block; width: 22px; height: 16px; position: relative; }
+    .hamburger-icon span {
+      display: block; height: 2px; background: var(--ink); border-radius: 2px;
+      position: absolute; left: 0; right: 0;
+      transition: transform 0.2s, opacity 0.2s, top 0.2s;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+    .mobile-nav {
+      display: none; flex-direction: column;
+      padding: 1rem var(--gap) 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link, .mobile-nav .nav-cta {
+      font-size: 1rem; padding: 0.65rem 0;
+      border: none; border-bottom: 1px solid var(--border);
+      border-radius: 0; margin: 0;
+    }
+    .mobile-nav .nav-cta {
+      margin-top: 1rem; border: 1.5px solid var(--ink);
+      border-radius: 6px; text-align: center; padding: 0.65rem 1rem;
+    }
+    @media (max-width: 700px) {
+      .primary-nav { display: none; }
+      .menu-btn { display: block; }
+    }
+
+    /* ============================================================
+       OPAL RULE
+    ============================================================ */
+    .opal-rule { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap); }
+    .opal-rule-line {
+      height: 2px;
+      background: linear-gradient(to right, var(--opal-violet) 0%, var(--opal-teal) 33%, var(--opal-rose) 66%, var(--opal-gold) 100%);
+      border-radius: 2px;
+      opacity: 0.65;
+    }
+
+    /* ============================================================
+       BREADCRUMB
+    ============================================================ */
+    .breadcrumb {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 1.25rem var(--gap) 0;
+    }
+    .breadcrumb ol {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      list-style: none;
+      font-size: 0.825rem;
+      color: var(--ink-muted);
+    }
+    .breadcrumb li + li::before {
+      content: '/';
+      margin-right: 0.35rem;
+      color: var(--border-strong);
+    }
+    .breadcrumb a {
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+    .breadcrumb a:hover, .breadcrumb a:focus-visible {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+    .breadcrumb [aria-current="page"] { color: var(--ink); }
+
+    /* ============================================================
+       CASE STUDY HERO
+    ============================================================ */
+    .cs-hero {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4.5rem) var(--gap) clamp(2rem, 5vw, 3.5rem);
+    }
+
+    .cs-org-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--opal-teal-dark);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .cs-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5.5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      max-width: 760px;
+      margin-bottom: 1.25rem;
+    }
+
+    .cs-subtitle {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-weight: 300;
+      color: var(--ink-secondary);
+      max-width: 600px;
+      line-height: 1.65;
+    }
+
+    /* Meta grid */
+    .cs-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0;
+      margin-top: 2.5rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 780px;
+    }
+    .cs-meta-item {
+      padding: 1rem 1.25rem;
+      border-right: 1px solid var(--border);
+    }
+    .cs-meta-item:last-child { border-right: none; }
+    @media (max-width: 600px) {
+      .cs-meta { grid-template-columns: 1fr 1fr; }
+      .cs-meta-item:nth-child(2) { border-right: none; }
+      .cs-meta-item:nth-child(3) { border-top: 1px solid var(--border); }
+      .cs-meta-item:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
+    }
+    .cs-meta-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.3rem;
+    }
+    .cs-meta-value {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    /* ============================================================
+       IMPACT BAR — key outcomes at a glance
+    ============================================================ */
+    .impact-bar {
+      background: var(--surface-soft);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .impact-bar-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 2rem var(--gap);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+    .impact-stat { display: flex; flex-direction: column; gap: 0.3rem; }
+    .impact-num {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .impact-stat:nth-child(1) .impact-num { color: var(--opal-teal-dark); }
+    .impact-stat:nth-child(2) .impact-num { color: var(--opal-violet-dark); }
+    .impact-stat:nth-child(3) .impact-num { color: var(--opal-rose-dark); }
+    .impact-desc {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       CASE STUDY BODY — prose + sections
+    ============================================================ */
+    .cs-body {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap);
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0 4rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .cs-body { grid-template-columns: 1fr; gap: 0; }
+      .cs-toc { display: none; }
+    }
+
+    /* Table of contents — sticky sidebar */
+    .cs-toc {
+      position: sticky;
+      top: 84px;
+      align-self: start;
+    }
+    .cs-toc-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.75rem;
+    }
+    .cs-toc ol {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .cs-toc a {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      text-decoration: none;
+      padding: 0.3rem 0.6rem;
+      border-left: 2px solid var(--border);
+      border-radius: 0 4px 4px 0;
+      transition: color 0.15s, border-color 0.15s;
+      line-height: 1.4;
+    }
+    .cs-toc a:hover, .cs-toc a:focus-visible {
+      color: var(--ink);
+      border-left-color: var(--opal-teal);
+    }
+    .cs-toc a[aria-current="true"] {
+      color: var(--ink);
+      border-left-color: var(--opal-teal);
+      font-weight: 500;
+    }
+
+    /* Prose column */
+    .cs-prose { min-width: 0; }
+
+    /* Section blocks */
+    .cs-section {
+      margin-bottom: clamp(3rem, 7vw, 5rem);
+      scroll-margin-top: 84px;
+    }
+
+    .cs-section-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .cs-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+    }
+
+    .cs-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .cs-section p {
+      font-size: 1rem;
+      color: var(--ink-secondary);
+      line-height: 1.8;
+      max-width: var(--prose-w);
+      margin-bottom: 1.1rem;
+    }
+    .cs-section p:last-child { margin-bottom: 0; }
+
+    /* Pull quote */
+    .pull-quote {
+      border-left: 3px solid var(--opal-teal);
+      padding: 0.75rem 1.25rem;
+      margin: 2rem 0;
+      background: rgba(43,191,160,0.05);
+      border-radius: 0 8px 8px 0;
+    }
+    .pull-quote p {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--ink);
+      margin: 0;
+      max-width: 560px;
+    }
+
+    /* Insight callout box */
+    .insight-box {
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      background: var(--surface-soft);
+    }
+    .insight-box-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--opal-violet-dark);
+      margin-bottom: 0.5rem;
+    }
+    .insight-box p {
+      font-size: 0.9375rem;
+      color: var(--ink);
+      line-height: 1.7;
+      max-width: none;
+      margin: 0;
+    }
+
+    /* Process steps */
+    .process-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .process-step {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .process-step-num {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--ink-muted);
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .process-step-content strong {
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+    .process-step-content p {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      line-height: 1.65;
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Image placeholder (for when screenshots are added) */
+    .cs-img-placeholder {
+      width: 100%;
+      min-height: 220px;
+      background: var(--surface-soft);
+      border: 1.5px dashed var(--border-strong);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 2rem 0;
+      color: var(--ink-muted);
+      font-size: 0.85rem;
+    }
+    .cs-img-placeholder svg { opacity: 0.4; }
+    .cs-img-placeholder figcaption {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 0 1rem;
+      max-width: 480px;
+    }
+
+    /* Caption for real images */
+    figure { margin: 2rem 0; }
+    figure img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    figcaption {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      font-style: italic;
+      margin-top: 0.6rem;
+      line-height: 1.5;
+    }
+
+    /* Chip tags */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1rem 0;
+    }
+    .chip {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      color: var(--ink);
+      background: transparent;
+    }
+    .chip-teal   { border-color: var(--opal-teal);   color: var(--opal-teal-dark); }
+    .chip-violet { border-color: var(--opal-violet);  color: var(--opal-violet-dark); }
+    .chip-rose   { border-color: var(--opal-rose);    color: var(--opal-rose-dark); }
+    .chip-gold   { border-color: var(--opal-gold);    color: var(--opal-gold-dark); }
+
+    /* ============================================================
+       NEXT / PREV NAV
+    ============================================================ */
+    .cs-nav {
+      border-top: 1px solid var(--border);
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 2.5rem var(--gap);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cs-nav-back a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border: 1.5px solid var(--ink);
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .cs-nav-back a:hover, .cs-nav-back a:focus-visible {
+      background: var(--ink);
+      color: var(--surface);
+    }
+    .cs-nav-next {
+      text-align: right;
+    }
+    .cs-nav-next-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.25rem;
+    }
+    .cs-nav-next a {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .cs-nav-next a:hover, .cs-nav-next a:focus-visible {
+      text-decoration: underline;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .site-footer {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 2rem var(--gap);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .footer-wordmark {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover, .footer-links a:focus-visible {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+    .footer-copy { font-size: 0.8rem; color: var(--ink-muted); width: 100%; text-align: right; }
+    @media (max-width: 540px) {
+      .footer-copy { text-align: left; }
+      .site-footer { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ============================================================
+       UTILITIES
+    ============================================================ */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="wordmark" aria-label="Mali — home">
+        <span class="mali-m" aria-hidden="true">M</span>ali
+      </a>
+      <nav aria-label="Primary navigation">
+        <ul class="primary-nav" role="list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/about" class="nav-link">About Me</a></li>
+          <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+          <li><a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
+        aria-label="Open navigation menu" id="menu-toggle">
+        <span class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/about" class="nav-link">About Me</a></li>
+        <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+      </ul>
+      <a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a>
+    </nav>
+  </header>
+
+
+  <!-- ============================================================
+       MAIN
+  ============================================================ -->
+  <main id="main-content" tabindex="-1">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/work">My Work</a></li>
+        <li><span aria-current="page">Annotation Kit &amp; Decision Trees</span></li>
+      </ol>
+    </nav>
+
+    <!-- Case study hero -->
+    <header class="cs-hero">
+      <span class="cs-org-label">Verily</span>
+      <h1 class="cs-title">Enabling UX Designers to Embed Accessibility</h1>
+      <p class="cs-subtitle">
+        Designing an annotation kit and decision trees that gave 20+ designers the autonomy
+        to complete accessibility annotations independently — from scratch.
+      </p>
+
+      <dl class="cs-meta" aria-label="Project details">
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">My Role</dt>
+          <dd class="cs-meta-value">Lead Designer &amp; Strategist</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Timeline</dt>
+          <dd class="cs-meta-value">Oct 2024 – Feb 2025</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Tools</dt>
+          <dd class="cs-meta-value">Figma, FigJam, Confluence</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Methods</dt>
+          <dd class="cs-meta-value">Comparative Analysis, User Research, Testing</dd>
+        </div>
+      </dl>
+    </header>
+
+    <!-- Opal rule -->
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- Impact bar -->
+    <section aria-labelledby="impact-heading">
+      <h2 id="impact-heading" class="sr-only">Project outcomes</h2>
+      <div class="impact-bar">
+        <div class="impact-bar-inner">
+          <div class="impact-stat">
+            <span class="impact-num" aria-label="20 plus">20+</span>
+            <p class="impact-desc">designers now completing annotations independently</p>
+          </div>
+          <div class="impact-stat">
+            <span class="impact-num">0 → all</span>
+            <p class="impact-desc">designers annotating — from none at the start to the full team</p>
+          </div>
+          <div class="impact-stat">
+            <span class="impact-num">Zero bugs</span>
+            <p class="impact-desc">on several annotation sets that went to development without feedback</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Opal rule -->
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- Body: TOC + prose -->
+    <div class="cs-body">
+
+      <!-- Sticky table of contents -->
+      <aside class="cs-toc" aria-label="Case study sections">
+        <p class="cs-toc-label">Contents</p>
+        <ol role="list">
+          <li><a href="#problem">The Problem</a></li>
+          <li><a href="#discovery">Exploration &amp; Discovery</a></li>
+          <li><a href="#annotation-kit">Annotation Kit</a></li>
+          <li><a href="#decision-trees">Decision Trees</a></li>
+          <li><a href="#results">Results</a></li>
+        </ol>
+      </aside>
+
+      <!-- Prose -->
+      <article class="cs-prose" aria-label="Case study">
+
+        <!-- THE PROBLEM -->
+        <section id="problem" class="cs-section" aria-labelledby="problem-heading">
+          <p class="cs-section-label">Background</p>
+          <h2 id="problem-heading">The Problem</h2>
+          <p>
+            With only two accessibility design specialists supporting over 40 UX designers, we needed to
+            figure out how to ensure all designs could get annotated before going to development.
+            Annotations implemented incorrectly can cause more problems than they solve — so it wasn't
+            enough to hand designers a kit and hope for the best.
+          </p>
+
+          <div class="insight-box" role="note">
+            <p class="insight-box-label">The constraint</p>
+            <p>
+              2 accessibility specialists. 40+ UX designers. Every design needed annotations before development.
+              The math didn't work without scaling designer capability directly.
+            </p>
+          </div>
+
+          <p>
+            I wanted to make sure our annotation kit was genuinely easy to use, and that designers had the
+            tools to know exactly how to implement annotations — not just what annotations are.
+          </p>
+        </section>
+
+        <!-- EXPLORATION & DISCOVERY -->
+        <section id="discovery" class="cs-section" aria-labelledby="discovery-heading">
+          <p class="cs-section-label">Research</p>
+          <h2 id="discovery-heading">Exploration &amp; Discovery</h2>
+
+          <h3>Competitive Analysis</h3>
+          <p>
+            I knew the Verily Annotation Kit needed a refresh, so I looked at how other companies
+            were handling annotations. I explored kits from Indeed, the VA, and individually published
+            kits on the Figma Community — including the CVS Annotation Kit, which I had contributed to
+            in a previous role.
+          </p>
+          <p>
+            My prior experience with the CVS kit gave me useful context, but I was careful not to let
+            familiarity substitute for evaluation. The competitive analysis helped me understand which
+            annotation elements were most important, how use cases were documented, and how teams were
+            customizing the CVS kit as a base.
+          </p>
+          <p>
+            My team ultimately decided to use the CVS kit as our foundation — it had already solved for
+            reducing clutter, adding detail, and Figma library integration, and its architecture made
+            customization straightforward.
+          </p>
+
+          <h3>User Research</h3>
+          <p>
+            Before touching the kit, I needed to understand designers' real workflows. I ran sessions
+            with UX designers across teams to observe how they organized Figma files, how they moved
+            through a design, and how — or if — they were doing annotations. I made sure to include
+            designers at every experience level.
+          </p>
+
+          <div class="pull-quote">
+            <p>"Everyone was at a different level, and nobody felt comfortable doing annotations on their own."</p>
+          </div>
+
+          <p>
+            Even the most accessibility-fluent designers were missing key steps. This told me something
+            important: the gap wasn't just knowledge — it was the absence of a clear, standardized process
+            that met people where they were.
+          </p>
+
+          <div class="insight-box" role="note">
+            <p class="insight-box-label">Key insight</p>
+            <p>
+              The CVS Annotation Kit was built for accessibility experts. Verily needed something that
+              could onboard designers at every level — without requiring prior accessibility experience
+              to use it effectively.
+            </p>
+          </div>
+
+          <div class="chip-row" aria-label="Methods used">
+            <span class="chip chip-teal">Comparative analysis</span>
+            <span class="chip chip-violet">Observational research</span>
+            <span class="chip chip-rose">Workflow mapping</span>
+            <span class="chip chip-gold">Multi-level testing</span>
+          </div>
+        </section>
+
+        <!-- ANNOTATION KIT -->
+        <section id="annotation-kit" class="cs-section" aria-labelledby="kit-heading">
+          <p class="cs-section-label">Design Process</p>
+          <h2 id="kit-heading">Annotation Kit</h2>
+
+          <h3>Selecting components</h3>
+          <p>
+            The CVS kit was a strong starting point, but not every component made sense for Verily.
+            Where Verily's design system already covered accessibility details — like input fields — I
+            removed redundant annotation components to reduce noise. Where context still mattered even
+            for design-system components (like buttons, which always need a clear accessible name), I kept
+            them.
+          </p>
+          <p>
+            I also added components specific to our needs, including language and title annotations to
+            ensure every annotated screen captured those additional details.
+          </p>
+
+          <figure>
+            <img
+              src="../images/annotation-kit-buttons.png"
+              alt="Annotation components for buttons: A Pin, a lasso, and a button details component with space to specify the html element"
+              width="1440"
+              height="480"
+              loading="lazy"
+            />
+            <figcaption>Annotation kit stamps for buttons — pin stamp, lasso stamp, and a details component showing the HTML element field.</figcaption>
+          </figure>
+
+          <h3>Iterating in the wild</h3>
+          <p>
+            The first launch was primarily web-focused, but designed to stretch to mobile. Once a project
+            came in to redesign the VerilyMe mobile app, I built a new annotation component for swipe
+            groups — meeting with mobile developers, accessibility engineers, and my mobile accessibility
+            mentor to define the right variables.
+          </p>
+          <p>
+            I aligned the terminology with what engineers had already learned for accessibility,
+            using name, role, and value as the structure for detail sections.
+          </p>
+          <p>
+            Each quarter, I reviewed annotations from designers and tracked recurring patterns in note
+            annotations. Rather than leaving designers to reinvent the wheel, I added note templates
+            directly to the kit — for things like default focus order, data visualization requirements,
+            and reflow and zoom guidance.
+          </p>
+
+          <div class="process-steps" role="list" aria-label="Iteration approach">
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">1</span>
+              <div class="process-step-content">
+                <strong>Web-first launch</strong>
+                <p>Launched core kit components focused on web, with mobile-compatible options included from the start.</p>
+              </div>
+            </div>
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">2</span>
+              <div class="process-step-content">
+                <strong>Mobile expansion</strong>
+                <p>Built swipe group annotations for VerilyMe, grounded in real developer and engineer input.</p>
+              </div>
+            </div>
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">3</span>
+              <div class="process-step-content">
+                <strong>Quarterly note templates</strong>
+                <p>Identified recurring annotation patterns and converted them into reusable templates — reducing duplication and improving consistency.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DECISION TREES -->
+        <section id="decision-trees" class="cs-section" aria-labelledby="trees-heading">
+          <p class="cs-section-label">Design Process</p>
+          <h2 id="trees-heading">Decision Trees</h2>
+
+          <h3>From documentation to in-workflow tools</h3>
+          <p>
+            While I developed the annotation kit, a teammate was building documentation in Confluence.
+            But user research had already surfaced a problem: designers rarely used Confluence, even for
+            resources that had been well-socialized. When they did, it was a one-time read — not an
+            ongoing reference.
+          </p>
+
+          <div class="pull-quote">
+            <p>"Anything outside of Figma felt like an extra step taking them away from their workflow."</p>
+          </div>
+
+          <p>
+            When I showed designers the Confluence documentation, they thought it would be useful for
+            deep learning — but not for their active annotation work. They needed something faster and
+            closer to where the work was happening.
+          </p>
+          <p>
+            Taking inspiration from user flows, I created annotation decision trees: Figma-native,
+            component-level guides that designers could reference — and paste directly into their design
+            files — while annotating.
+          </p>
+
+          <h3>Iterating toward clarity</h3>
+          <p>
+            My first decision tree was large and complex, easy to get lost in. Early testing made
+            the problem immediately clear. I broke it down first into three trees (by annotation
+            strategy), then ultimately into one tree per component.
+          </p>
+
+          <div class="insight-box" role="note">
+            <p class="insight-box-label">Why component-level trees worked</p>
+            <p>
+              Smaller trees were less intimidating and easy to skim. They were small enough to embed
+              directly in design files. And because they were scoped to a single component, designers
+              could skip entire trees that didn't apply — significantly reducing cognitive load.
+            </p>
+          </div>
+
+          <p>
+            In the final iteration, a content designer reviewed the trees and cut them nearly in half —
+            tightening the language without losing any guidance. That collaboration was a turning point
+            in making the trees genuinely usable.
+          </p>
+
+          <figure>
+            <div class="cs-img-placeholder" role="img" aria-label="Decision tree iterations placeholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M3 6h18M3 12h12M3 18h8"/><circle cx="19" cy="12" r="2"/><circle cx="15" cy="18" r="2"/><path d="M19 14v2M17 18h-2"/>
+              </svg>
+              <figcaption>Add screenshots of your decision tree iterations here — early complex version vs. final component-level trees.</figcaption>
+            </div>
+          </figure>
+        </section>
+
+        <!-- RESULTS -->
+        <section id="results" class="cs-section" aria-labelledby="results-heading">
+          <p class="cs-section-label">Outcomes</p>
+          <h2 id="results-heading">Results</h2>
+          <p>
+            The most fulfilling part of this project was watching designers gain the autonomy to
+            complete annotations on their own. Feedback across the team confirmed that the decision
+            trees were genuinely useful — not just as a reference, but as a training tool.
+          </p>
+
+          <div class="pull-quote">
+            <p>"This is the tool I wish I had when I was learning how to annotate."</p>
+          </div>
+
+          <p>
+            When I started at Verily, only a handful of designers had ever annotated their designs,
+            and none of them were confident doing it alone. A year later, all 20+ designers I support
+            are annotating independently. I review every set of annotations — and some have come back
+            from development testing with zero bugs.
+          </p>
+          <p>
+            To move beyond anecdotal evidence, I'm currently using Jira dashboards to track the impact
+            of annotations on accessibility compliance at Verily, measuring where gaps remain and where
+            the kit can improve further.
+          </p>
+
+          <div class="chip-row" aria-label="Key outcomes">
+            <span class="chip chip-teal">20+ independent annotators</span>
+            <span class="chip chip-violet">Figma-native workflow</span>
+            <span class="chip chip-rose">Zero-bug annotation sets</span>
+            <span class="chip chip-gold">Ongoing Jira tracking</span>
+          </div>
+        </section>
+
+      </article>
+    </div>
+
+  </main>
+
+
+  <!-- Case study navigation -->
+  <nav class="cs-nav" aria-label="Case study navigation">
+    <div class="cs-nav-back">
+      <a href="/work">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+          <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        All work
+      </a>
+    </div>
+    <div class="cs-nav-next">
+      <p class="cs-nav-next-label">Next case study</p>
+      <a href="/work/inclusive-patient-experience">Inclusive Patient Experience →</a>
+    </div>
+  </nav>
+
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <a href="/" class="footer-wordmark" aria-label="Mali — home">Mali</a>
+    <nav aria-label="Footer navigation">
+      <ul class="footer-links" role="list">
+        <li><a href="/about">About</a></li>
+        <li><a href="/work">Work</a></li>
+        <li><a href="/resume.pdf" aria-label="Resume (PDF)">Resume</a></li>
+        <li><a href="mailto:hello@mali.design">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-copy">
+      <small>Designed with accessibility at the center. &copy; <span id="year"></span> Mali.</small>
+    </p>
+  </footer>
+
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuBtn = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    menuBtn.addEventListener('click', () => {
+      const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      menuBtn.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+      if (isOpen) { mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open'); }
+      else { mobileNav.removeAttribute('hidden'); mobileNav.classList.add('open'); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav.setAttribute('hidden', '');
+        mobileNav.classList.remove('open');
+        menuBtn.focus();
+      }
+    });
+    mobileNav.addEventListener('focusout', (e) => {
+      if (!mobileNav.contains(e.relatedTarget) && !menuBtn.contains(e.relatedTarget)) {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.setAttribute('aria-label', 'Open navigation menu');
+          mobileNav.setAttribute('hidden', '');
+          mobileNav.classList.remove('open');
+        }
+      }
+    });
+
+    /* Active TOC link on scroll */
+    const sections = document.querySelectorAll('.cs-section[id]');
+    const tocLinks = document.querySelectorAll('.cs-toc a');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(link => {
+            link.removeAttribute('aria-current');
+            if (link.getAttribute('href') === '#' + entry.target.id) {
+              link.setAttribute('aria-current', 'true');
+            }
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+</body>
+</html>
