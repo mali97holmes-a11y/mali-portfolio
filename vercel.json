@@ -5,6 +5,7 @@
     { "source": "/work", "destination": "/work.html" },
     { "source": "/resume", "destination": "/resume.html" },
     { "source": "/work/annotations-and-decision-trees", "destination": "/work/annotations-and-decision-trees.html" },
-    { "source": "/work/reducing-accessibility-defects", "destination": "/work/reducing-accessibility-defects.html" }
+    { "source": "/work/reducing-accessibility-defects", "destination": "/work/reducing-accessibility-defects.html" },
+    { "source": "/work/food-friends", "destination": "/work/food-friends.html" }
   ]
 }
