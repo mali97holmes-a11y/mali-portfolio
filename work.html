@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Work — Mali</title>
+  <meta name="description" content="Case studies by Mali, an accessibility and UX designer — annotation kits, Jira dashboards, and adaptive app design." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --opal-teal:        #2BBFA0;
+      --opal-rose:        #D95F8A;
+      --opal-gold:        #C8860A;
+      --opal-violet:      #6B4FCC;
+      --opal-teal-dark:   #1A7A68;
+      --opal-rose-dark:   #A33A65;
+      --opal-gold-dark:   #8A5C06;
+      --opal-violet-dark: #4A35A0;
+
+      --ink:           #111111;
+      --ink-secondary: #444444;
+      --ink-muted:     #666666;
+      --surface:       #FFFFFF;
+      --surface-soft:  #F7F7F5;
+      --border:        rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.20);
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --max-w: 1100px;
+      --gap:   clamp(1.5rem, 4vw, 3rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; }
+    ul { list-style: none; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--ink); color: #fff;
+      padding: 0.6rem 1.2rem; border-radius: 0 0 6px 6px;
+      font-size: 0.9rem; font-weight: 500; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; outline: 3px solid var(--opal-teal); outline-offset: 2px; }
+
+    :focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; border-radius: 2px; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap);
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .wordmark {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--ink);
+    }
+    .wordmark .mali-m {
+      background: linear-gradient(135deg, var(--opal-violet) 0%, var(--opal-teal) 50%, var(--opal-rose) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .primary-nav { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-link {
+      font-size: 0.9rem; font-weight: 400; color: var(--ink-secondary);
+      text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 6px;
+      transition: color 0.15s, background 0.15s; position: relative;
+    }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--surface-soft); }
+    .nav-link[aria-current="page"] { color: var(--ink); font-weight: 500; }
+    .nav-link[aria-current="page"]::after {
+      content: ''; position: absolute; bottom: 4px; left: 0.85rem; right: 0.85rem;
+      height: 2px; background: var(--opal-teal); border-radius: 2px;
+    }
+    .nav-cta {
+      font-size: 0.875rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      padding: 0.45rem 1rem; border: 1.5px solid var(--ink); border-radius: 6px;
+      margin-left: 0.5rem; transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover, .nav-cta:focus-visible { background: var(--ink); color: var(--surface); }
+    .menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 0.5rem; color: var(--ink); border-radius: 6px;
+    }
+    .menu-btn:focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; }
+    .hamburger-icon { display: block; width: 22px; height: 16px; position: relative; }
+    .hamburger-icon span {
+      display: block; height: 2px; background: var(--ink); border-radius: 2px;
+      position: absolute; left: 0; right: 0; transition: transform 0.2s, opacity 0.2s, top 0.2s;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+    .mobile-nav {
+      display: none; flex-direction: column; padding: 1rem var(--gap) 1.5rem;
+      border-top: 1px solid var(--border); background: var(--surface);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link, .mobile-nav .nav-cta {
+      font-size: 1rem; padding: 0.65rem 0; border: none;
+      border-bottom: 1px solid var(--border); border-radius: 0; margin: 0;
+    }
+    .mobile-nav .nav-cta {
+      margin-top: 1rem; border: 1.5px solid var(--ink);
+      border-radius: 6px; text-align: center; padding: 0.65rem 1rem;
+    }
+    @media (max-width: 700px) { .primary-nav { display: none; } .menu-btn { display: block; } }
+
+    /* ── OPAL RULE ── */
+    .opal-rule { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap); }
+    .opal-rule-line {
+      height: 2px;
+      background: linear-gradient(to right, var(--opal-violet) 0%, var(--opal-teal) 33%, var(--opal-rose) 66%, var(--opal-gold) 100%);
+      border-radius: 2px; opacity: 0.65;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap) clamp(2rem, 4vw, 3rem);
+    }
+    .page-header-label {
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.75rem; display: block;
+    }
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .page-header-intro {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--ink-secondary);
+      max-width: 580px;
+      line-height: 1.7;
+    }
+
+    /* ── CASE STUDY LIST ── */
+    .work-list {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 3.5rem) var(--gap) clamp(3rem, 7vw, 5rem);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5px; /* hair gap between items — the dividers do the visual separation */
+    }
+
+    /* Each case study row */
+    .cs-row {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      text-decoration: none;
+      color: inherit;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+      transition: border-color 0.2s, transform 0.18s;
+      position: relative;
+    }
+    .cs-row:hover, .cs-row:focus-visible {
+      border-color: var(--ink);
+      transform: translateY(-2px);
+    }
+    .cs-row:focus-visible {
+      outline: 3px solid var(--opal-violet);
+      outline-offset: 3px;
+    }
+
+    /* Coming soon rows are slightly muted */
+    .cs-row[aria-disabled="true"] {
+      cursor: default;
+      pointer-events: none;
+    }
+    .cs-row[aria-disabled="true"]:hover { transform: none; border-color: var(--border-strong); }
+
+    /* Thumbnail panel */
+    .cs-thumb {
+      height: 100%;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-right: 1.5px solid var(--border);
+    }
+    .cs-row:nth-child(1) .cs-thumb {
+      background: linear-gradient(135deg, rgba(107,79,204,0.10) 0%, rgba(43,191,160,0.14) 100%);
+    }
+    .cs-row:nth-child(2) .cs-thumb {
+      background: linear-gradient(135deg, rgba(43,191,160,0.08) 0%, rgba(200,134,10,0.12) 100%);
+    }
+    .cs-row:nth-child(3) .cs-thumb {
+      background: linear-gradient(135deg, rgba(217,95,138,0.08) 0%, rgba(107,79,204,0.10) 100%);
+    }
+
+    .cs-thumb img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    /* Number label in thumb */
+    .cs-num {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1;
+      opacity: 0.10;
+      color: var(--ink);
+      user-select: none;
+    }
+
+    /* Coming soon badge */
+    .cs-badge {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      color: var(--ink-muted);
+      background: rgba(255,255,255,0.85);
+    }
+
+    /* Content panel */
+    .cs-content {
+      padding: 2rem 2rem 2rem 2.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    .cs-org {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .cs-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .cs-desc {
+      font-size: 0.9375rem;
+      color: var(--ink-secondary);
+      line-height: 1.7;
+      max-width: 540px;
+    }
+
+    .cs-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+    .cs-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      color: var(--ink-secondary);
+    }
+
+    /* Opal-colored accent tags */
+    .cs-tag-teal   { border-color: var(--opal-teal);   color: var(--opal-teal-dark);   background: rgba(43,191,160,0.06); }
+    .cs-tag-violet { border-color: var(--opal-violet);  color: var(--opal-violet-dark);  background: rgba(107,79,204,0.06); }
+    .cs-tag-rose   { border-color: var(--opal-rose);    color: var(--opal-rose-dark);    background: rgba(217,95,138,0.06); }
+    .cs-tag-gold   { border-color: var(--opal-gold);    color: var(--opal-gold-dark);    background: rgba(200,134,10,0.06); }
+
+    .cs-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-top: 0.5rem;
+    }
+    .cs-cta svg { transition: transform 0.15s; }
+    .cs-row:hover .cs-cta svg,
+    .cs-row:focus-visible .cs-cta svg { transform: translateX(4px); }
+
+    .cs-cta-muted {
+      font-size: 0.875rem;
+      color: var(--ink-muted);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    /* Impact pills — quick stat highlights on each card */
+    .cs-impacts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .cs-impact {
+      font-size: 0.775rem;
+      font-weight: 500;
+      padding: 0.25rem 0.65rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--border-strong);
+      color: var(--ink);
+      background: transparent;
+    }
+
+    /* Responsive: stack thumb above content on mobile */
+    @media (max-width: 680px) {
+      .cs-row {
+        grid-template-columns: 1fr;
+      }
+      .cs-thumb {
+        min-height: 160px;
+        border-right: none;
+        border-bottom: 1.5px solid var(--border);
+      }
+      .cs-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* ── CONTACT BAND ── */
+    .contact-band {
+      background: var(--surface-soft);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4rem) var(--gap);
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 1.5rem;
+    }
+    .contact-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 1.8rem);
+      font-weight: 700; color: var(--ink); margin-bottom: 0.35rem;
+    }
+    .contact-text p { font-size: 0.95rem; color: var(--ink-secondary); }
+    .contact-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500;
+      text-decoration: none; padding: 0.7rem 1.4rem; border-radius: 8px;
+      transition: background 0.15s, color 0.15s, transform 0.1s; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+    .btn-outline:hover, .btn-outline:focus-visible { background: var(--ink); color: var(--surface); }
+    .btn-ghost-teal { background: transparent; color: var(--opal-teal-dark); border: 1.5px solid var(--opal-teal); }
+    .btn-ghost-teal:hover, .btn-ghost-teal:focus-visible { background: rgba(43,191,160,0.10); }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      max-width: var(--max-w); margin: 0 auto; padding: 2rem var(--gap);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; border-top: 1px solid var(--border);
+    }
+    .footer-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); text-decoration: none; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover, .footer-links a:focus-visible { color: var(--ink); text-decoration: underline; }
+    .footer-copy { font-size: 0.8rem; color: var(--ink-muted); width: 100%; text-align: right; }
+    @media (max-width: 540px) { .footer-copy { text-align: left; } .site-footer { flex-direction: column; align-items: flex-start; } }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="wordmark" aria-label="Mali — home">
+        <span class="mali-m" aria-hidden="true">M</span>ali
+      </a>
+      <nav aria-label="Primary navigation">
+        <ul class="primary-nav" role="list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/about" class="nav-link">About Me</a></li>
+          <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+          <li><a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
+        aria-label="Open navigation menu" id="menu-toggle">
+        <span class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/about" class="nav-link">About Me</a></li>
+        <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+      </ul>
+      <a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a>
+    </nav>
+  </header>
+
+
+  <main id="main-content" tabindex="-1">
+
+    <!-- Page header -->
+    <header class="page-header">
+      <span class="page-header-label">Portfolio</span>
+      <h1>My Work</h1>
+      <p class="page-header-intro">
+        A mix of accessibility strategy, UX process design, and inclusive product thinking —
+        across healthcare, enterprise, and personal projects.
+      </p>
+    </header>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- Case study list -->
+    <section aria-labelledby="cs-list-heading">
+      <h2 id="cs-list-heading" class="sr-only">Case studies</h2>
+
+      <ul class="work-list" role="list">
+
+        <!-- Case study 1 -->
+        <li>
+          <a href="/work/annotations-and-decision-trees" class="cs-row" aria-describedby="cs1-desc">
+            <div class="cs-thumb" role="img" aria-label="Annotation Kit and Decision Trees">
+              <span class="cs-num" aria-hidden="true">01</span>
+            </div>
+            <div class="cs-content">
+              <p class="cs-org">Verily</p>
+              <h3 class="cs-title">Annotation Kit &amp; Decision Trees</h3>
+              <p class="cs-desc" id="cs1-desc">
+                Enabling 20+ UX designers to complete accessibility annotations independently —
+                through a Figma-native annotation kit and component-level decision trees that
+                met designers wherever they were in their accessibility journey.
+              </p>
+              <div class="cs-impacts" aria-label="Key outcomes">
+                <span class="cs-impact">20+ independent annotators</span>
+                <span class="cs-impact">Zero-bug annotation sets</span>
+              </div>
+              <div class="cs-tags" aria-label="Tags">
+                <span class="cs-tag cs-tag-teal">Accessibility</span>
+                <span class="cs-tag cs-tag-violet">Design Systems</span>
+                <span class="cs-tag">Figma</span>
+                <span class="cs-tag">Healthcare</span>
+                <span class="cs-tag">User Research</span>
+              </div>
+              <span class="cs-cta" aria-hidden="true">
+                Read case study
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" focusable="false">
+                  <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          </a>
+        </li>
+
+        <!-- Case study 2 -->
+        <li>
+          <a href="/work/reducing-accessibility-defects" class="cs-row" aria-describedby="cs2-desc">
+            <div class="cs-thumb" role="img" aria-label="Reducing Accessibility Defects Through Data">
+              <span class="cs-num" aria-hidden="true">02</span>
+            </div>
+            <div class="cs-content">
+              <p class="cs-org">Verily</p>
+              <h3 class="cs-title">Reducing Accessibility Defects Through Data</h3>
+              <p class="cs-desc" id="cs2-desc">
+                Building Jira dashboards and a defect refinement process that closed the
+                feedback loop between accessibility testing and upstream design practice —
+                preventing 144 bugs and saving an estimated $181k over 7 months.
+              </p>
+              <div class="cs-impacts" aria-label="Key outcomes">
+                <span class="cs-impact">144 bugs prevented</span>
+                <span class="cs-impact">$181k estimated savings</span>
+                <span class="cs-impact">720 hrs saved</span>
+              </div>
+              <div class="cs-tags" aria-label="Tags">
+                <span class="cs-tag cs-tag-teal">Data &amp; Metrics</span>
+                <span class="cs-tag cs-tag-violet">Process Design</span>
+                <span class="cs-tag">Jira</span>
+                <span class="cs-tag">Healthcare</span>
+                <span class="cs-tag">Cross-functional</span>
+              </div>
+              <span class="cs-cta" aria-hidden="true">
+                Read case study
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" focusable="false">
+                  <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          </a>
+        </li>
+
+        <!-- Case study 3 — coming soon -->
+        <li>
+          <div class="cs-row" aria-describedby="cs3-desc" aria-disabled="true" role="article">
+            <div class="cs-thumb" role="img" aria-label="Food Friends — coming soon">
+              <span class="cs-num" aria-hidden="true">03</span>
+              <span class="cs-badge" aria-label="Status: in progress">In progress</span>
+            </div>
+            <div class="cs-content">
+              <p class="cs-org">Personal Project</p>
+              <h3 class="cs-title">Food Friends — Adaptive Meal Prep</h3>
+              <p class="cs-desc" id="cs3-desc">
+                Designing an iOS meal prep app for users with executive dysfunction —
+                low-friction, energy-adaptive UX that responds to user capacity in real time,
+                from ingredient inventory to recipe selection to shopping list generation.
+              </p>
+              <div class="cs-tags" aria-label="Tags">
+                <span class="cs-tag cs-tag-rose">Neurodivergent UX</span>
+                <span class="cs-tag cs-tag-gold">Adaptive Design</span>
+                <span class="cs-tag">iOS</span>
+                <span class="cs-tag">Figma</span>
+                <span class="cs-tag">Personal Project</span>
+              </div>
+              <p class="cs-cta-muted">Case study coming soon</p>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+  </main>
+
+
+  <aside class="contact-band" aria-label="Contact">
+    <div class="contact-inner">
+      <div class="contact-text">
+        <h2>Let's make something accessible.</h2>
+        <p>Open to full-time and contract roles in accessibility and UX design.</p>
+      </div>
+      <div class="contact-actions">
+        <a href="mailto:hello@mali.design" class="btn btn-outline">Get in touch</a>
+        <a href="https://linkedin.com/in/mali" class="btn btn-ghost-teal" target="_blank"
+          rel="noopener noreferrer" aria-label="LinkedIn profile (opens in new tab)">LinkedIn</a>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="site-footer" role="contentinfo">
+    <a href="/" class="footer-wordmark" aria-label="Mali — home">Mali</a>
+    <nav aria-label="Footer navigation">
+      <ul class="footer-links" role="list">
+        <li><a href="/about">About</a></li>
+        <li><a href="/work">Work</a></li>
+        <li><a href="/resume.pdf" aria-label="Resume (PDF)">Resume</a></li>
+        <li><a href="mailto:hello@mali.design">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-copy">
+      <small>Designed with accessibility at the center. &copy; <span id="year"></span> Mali.</small>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuBtn = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    menuBtn.addEventListener('click', () => {
+      const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      menuBtn.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+      if (isOpen) { mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open'); }
+      else { mobileNav.removeAttribute('hidden'); mobileNav.classList.add('open'); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        menuBtn.focus();
+      }
+    });
+    mobileNav.addEventListener('focusout', (e) => {
+      if (!mobileNav.contains(e.relatedTarget) && !menuBtn.contains(e.relatedTarget)) {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.setAttribute('aria-label', 'Open navigation menu');
+          mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
