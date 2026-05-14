@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume — Mali Holmes</title>
+  <meta name="description" content="Resume of Mali Holmes, Senior Accessibility and Inclusion Designer with experience at Verily, CVS Health, and USC." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --opal-teal:        #2BBFA0;
+      --opal-rose:        #D95F8A;
+      --opal-gold:        #C8860A;
+      --opal-violet:      #6B4FCC;
+      --opal-teal-dark:   #1A7A68;
+      --opal-rose-dark:   #A33A65;
+      --opal-gold-dark:   #8A5C06;
+      --opal-violet-dark: #4A35A0;
+
+      --ink:           #111111;
+      --ink-secondary: #444444;
+      --ink-muted:     #666666;
+      --surface:       #FFFFFF;
+      --surface-soft:  #F7F7F5;
+      --border:        rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.20);
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --max-w: 1100px;
+      --resume-w: 780px;
+      --gap: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; }
+    ul { list-style: none; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--ink); color: #fff;
+      padding: 0.6rem 1.2rem; border-radius: 0 0 6px 6px;
+      font-size: 0.9rem; font-weight: 500; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; outline: 3px solid var(--opal-teal); outline-offset: 2px; }
+
+    :focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; border-radius: 2px; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap);
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .wordmark {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--ink);
+    }
+    .wordmark .mali-m {
+      background: linear-gradient(135deg, var(--opal-violet) 0%, var(--opal-teal) 50%, var(--opal-rose) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .primary-nav { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-link {
+      font-size: 0.9rem; font-weight: 400; color: var(--ink-secondary);
+      text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 6px;
+      transition: color 0.15s, background 0.15s; position: relative;
+    }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--surface-soft); }
+    .nav-link[aria-current="page"] { color: var(--ink); font-weight: 500; }
+    .nav-link[aria-current="page"]::after {
+      content: ''; position: absolute; bottom: 4px; left: 0.85rem; right: 0.85rem;
+      height: 2px; background: var(--opal-teal); border-radius: 2px;
+    }
+    .nav-cta {
+      font-size: 0.875rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      padding: 0.45rem 1rem; border: 1.5px solid var(--ink); border-radius: 6px;
+      margin-left: 0.5rem; transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover, .nav-cta:focus-visible { background: var(--ink); color: var(--surface); }
+    .menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 0.5rem; color: var(--ink); border-radius: 6px;
+    }
+    .menu-btn:focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; }
+    .hamburger-icon { display: block; width: 22px; height: 16px; position: relative; }
+    .hamburger-icon span {
+      display: block; height: 2px; background: var(--ink); border-radius: 2px;
+      position: absolute; left: 0; right: 0; transition: transform 0.2s, opacity 0.2s, top 0.2s;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+    .mobile-nav {
+      display: none; flex-direction: column; padding: 1rem var(--gap) 1.5rem;
+      border-top: 1px solid var(--border); background: var(--surface);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link, .mobile-nav .nav-cta {
+      font-size: 1rem; padding: 0.65rem 0; border: none;
+      border-bottom: 1px solid var(--border); border-radius: 0; margin: 0;
+    }
+    .mobile-nav .nav-cta {
+      margin-top: 1rem; border: 1.5px solid var(--ink);
+      border-radius: 6px; text-align: center; padding: 0.65rem 1rem;
+    }
+    @media (max-width: 700px) { .primary-nav { display: none; } .menu-btn { display: block; } }
+
+    /* ── OPAL RULE ── */
+    .opal-rule { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap); }
+    .opal-rule-line {
+      height: 2px;
+      background: linear-gradient(to right, var(--opal-violet) 0%, var(--opal-teal) 33%, var(--opal-rose) 66%, var(--opal-gold) 100%);
+      border-radius: 2px; opacity: 0.65;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap) clamp(1.5rem, 3vw, 2.5rem);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .page-header-text {}
+    .page-header-label {
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.6rem; display: block;
+    }
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink);
+    }
+
+    /* Download button */
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500;
+      text-decoration: none; padding: 0.7rem 1.4rem;
+      border-radius: 8px; border: 1.5px solid var(--ink);
+      color: var(--ink); background: transparent;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-download:hover, .btn-download:focus-visible { background: var(--ink); color: var(--surface); }
+    .btn-download:active { transform: scale(0.98); }
+    .btn-download svg { flex-shrink: 0; }
+
+    /* ── RESUME LAYOUT ── */
+    .resume-wrap {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--gap) clamp(3rem, 7vw, 5rem);
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0 3.5rem;
+      align-items: start;
+    }
+    @media (max-width: 780px) {
+      .resume-wrap { grid-template-columns: 1fr; gap: 0; }
+      .resume-sidebar { display: none; }
+    }
+
+    /* ── SIDEBAR (sticky section nav) ── */
+    .resume-sidebar {
+      position: sticky;
+      top: 84px;
+      align-self: start;
+      padding-top: 0.25rem;
+    }
+    .sidebar-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.75rem;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0.1rem; }
+    .sidebar-nav a {
+      display: block; font-size: 0.8rem; color: var(--ink-muted); text-decoration: none;
+      padding: 0.3rem 0.6rem; border-left: 2px solid var(--border);
+      border-radius: 0 4px 4px 0; transition: color 0.15s, border-color 0.15s; line-height: 1.4;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a:focus-visible { color: var(--ink); border-left-color: var(--opal-teal); }
+    .sidebar-nav a[aria-current="true"] { color: var(--ink); border-left-color: var(--opal-teal); font-weight: 500; }
+
+    /* ── RESUME BODY ── */
+    .resume-body { min-width: 0; }
+
+    /* Resume name / contact header */
+    .resume-identity {
+      padding: 2rem 2.5rem;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      margin-bottom: 2.5rem;
+    }
+    .resume-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+    .resume-title {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--ink-secondary);
+      margin-bottom: 1rem;
+    }
+    .resume-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .resume-contact a {
+      font-size: 0.875rem;
+      color: var(--opal-teal-dark);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .resume-contact a:hover, .resume-contact a:focus-visible { color: var(--opal-violet-dark); }
+    .resume-contact span {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+    }
+
+    /* Section */
+    .resume-section {
+      margin-bottom: 2.75rem;
+      scroll-margin-top: 84px;
+    }
+    .resume-section-heading {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Experience entry */
+    .resume-entry {
+      margin-bottom: 2rem;
+    }
+    .resume-entry:last-child { margin-bottom: 0; }
+
+    .resume-entry-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.25rem 1rem;
+      margin-bottom: 0.2rem;
+    }
+    .resume-entry-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .resume-entry-date {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .resume-entry-org {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--opal-teal-dark);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Bullet list */
+    .resume-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .resume-bullets li {
+      font-size: 0.9rem;
+      color: var(--ink-secondary);
+      line-height: 1.7;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+    .resume-bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.65em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--opal-teal);
+      flex-shrink: 0;
+    }
+
+    /* Skills chips */
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .skill-chip {
+      font-size: 0.825rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      color: var(--ink);
+      background: transparent;
+    }
+
+    /* Awards */
+    .awards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .award-item {
+      font-size: 0.9rem;
+      color: var(--ink-secondary);
+      line-height: 1.6;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+    .award-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.65em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--opal-gold);
+      flex-shrink: 0;
+    }
+
+    /* References note */
+    .references-note {
+      margin-top: 2.5rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--opal-teal);
+      border-radius: 0 8px 8px 0;
+      background: rgba(43,191,160,0.04);
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      max-width: var(--max-w); margin: 0 auto; padding: 2rem var(--gap);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; border-top: 1px solid var(--border);
+    }
+    .footer-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); text-decoration: none; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover, .footer-links a:focus-visible { color: var(--ink); text-decoration: underline; }
+    .footer-copy { font-size: 0.8rem; color: var(--ink-muted); width: 100%; text-align: right; }
+    @media (max-width: 540px) { .footer-copy { text-align: left; } .site-footer { flex-direction: column; align-items: flex-start; } }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="wordmark" aria-label="Mali — home">
+        <span class="mali-m" aria-hidden="true">M</span>ali
+      </a>
+      <nav aria-label="Primary navigation">
+        <ul class="primary-nav" role="list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/about" class="nav-link">About Me</a></li>
+          <li><a href="/work" class="nav-link">My Work</a></li>
+          <li><a href="/resume" class="nav-cta" aria-current="page">Resume</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
+        aria-label="Open navigation menu" id="menu-toggle">
+        <span class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/about" class="nav-link">About Me</a></li>
+        <li><a href="/work" class="nav-link">My Work</a></li>
+        <li><a href="/resume" class="nav-link" aria-current="page">Resume</a></li>
+      </ul>
+    </nav>
+  </header>
+
+
+  <main id="main-content" tabindex="-1">
+
+    <header class="page-header">
+      <div class="page-header-text">
+        <span class="page-header-label">Resume</span>
+        <h1>Mali Holmes</h1>
+      </div>
+      <a href="/resume.docx" download="Mali_Holmes_Resume.docx" class="btn-download"
+        aria-label="Download resume as Word document">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+          <path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download resume
+      </a>
+    </header>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <div class="resume-wrap">
+
+      <!-- Sticky sidebar nav -->
+      <aside class="resume-sidebar" aria-label="Resume sections">
+        <p class="sidebar-label">Jump to</p>
+        <nav class="sidebar-nav" aria-label="Resume section navigation">
+          <a href="#experience">Experience</a>
+          <a href="#volunteer">Volunteer</a>
+          <a href="#skills">Skills</a>
+          <a href="#education">Education</a>
+          <a href="#awards">Awards</a>
+        </nav>
+      </aside>
+
+      <!-- Resume content -->
+      <div class="resume-body">
+
+        <!-- Identity block -->
+        <section aria-label="Contact information">
+          <div class="resume-identity">
+            <p class="resume-name">Mali Holmes</p>
+            <p class="resume-title">Senior Accessibility &amp; Inclusion Designer</p>
+            <div class="resume-contact">
+              <a href="mailto:mali97holmes@gmail.com">mali97holmes@gmail.com</a>
+              <a href="https://linkedin.com/in/maliholmes" target="_blank" rel="noopener noreferrer"
+                aria-label="LinkedIn profile (opens in new tab)">linkedin.com/in/maliholmes</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Work Experience -->
+        <section id="experience" class="resume-section" aria-labelledby="experience-heading">
+          <h2 id="experience-heading" class="resume-section-heading">Work Experience</h2>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Accessibility UX Specialist</span>
+              <span class="resume-entry-date">October 2024 – Present</span>
+            </div>
+            <p class="resume-entry-org">Verily <span style="font-weight:300;color:var(--ink-muted)">(Contract)</span></p>
+            <ul class="resume-bullets" aria-label="Responsibilities and achievements at Verily">
+              <li>Consulted on accessibility for 70+ designs, reviewed 30+ annotations from UX designers, and annotated 20+ designs</li>
+              <li>Updated design system working agreements to include accessibility in design system component lifecycle</li>
+              <li>Developed onboarding process and successfully onboarded 5 design teams (22 designers) to accessibility practices and design system adoption</li>
+              <li>Established partnership framework with engineering and design to integrate annotations into standard handoff process</li>
+              <li>Created defect refinement process to accurately discern root causes of defects, implemented Jira dashboards to track patterns, and initiated meetings with relevant stakeholders to facilitate problem solving and successfully reduce defect rates</li>
+              <li>Created Verily Annotation Kit and decision trees, enabling UX designers at all levels to complete accessibility annotations</li>
+              <li>Trained engineers on accessibility implementation through targeted office hours, resulting in a 4x increase in attendance and positive feedback from stakeholders across teams</li>
+              <li>Conducted cross-functional research on AI tool usage in design ideation, identifying accessibility risks and developing Figma Make guidelines to embed accessibility and design system best practices at the ideation stage</li>
+            </ul>
+          </div>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Accessibility Product Owner</span>
+              <span class="resume-entry-date">July 2024 – October 2024</span>
+            </div>
+            <p class="resume-entry-org">University of Southern California <span style="font-weight:300;color:var(--ink-muted)">(Contract)</span></p>
+            <ul class="resume-bullets" aria-label="Responsibilities and achievements at USC">
+              <li>Identified and documented WCAG 2.2 violations to ensure compliance across university digital properties</li>
+              <li>Collaborated with product teams and engineers to prioritize defects and ensure streamlined remediation</li>
+              <li>Expanded office hours initiatives to include accessibility support for site owners</li>
+            </ul>
+          </div>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Senior Accessibility Designer</span>
+              <span class="resume-entry-date">December 2021 – November 2023</span>
+            </div>
+            <p class="resume-entry-org">CVS Health</p>
+            <ul class="resume-bullets" aria-label="Responsibilities and achievements at CVS Health as Senior Accessibility Designer">
+              <li>Led inclusive design feedback, annotations, and documentation for CVS design system, homepage redesign, store locator, and loyalty/subscriptions branding projects with over 73 million visits</li>
+              <li>Created and delivered accessibility trainings for over 200 colleagues, collaborating with teams to educate experience designers, content strategists, marketing, and product stakeholders on best practices</li>
+              <li>Developed accessibility acceptance criteria for product and design stories in agile environment</li>
+              <li>Collaborated with product, design, and development to collect insights, prioritize, and remediate 70+ accessibility defects per month; created targeted trainings based on defect patterns</li>
+              <li>Conducted inclusivity audit on interview strategies and led interviews to grow team from 25 to 50+ colleagues in under one year</li>
+              <li>Developed workshops and training materials for enterprise-wide gender inclusion initiative resulting in more inclusive customer data collection and workplace practices</li>
+            </ul>
+          </div>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Accessibility Engineer</span>
+              <span class="resume-entry-date">June 2021 – December 2021</span>
+            </div>
+            <p class="resume-entry-org">CVS Health <span style="font-weight:300;color:var(--ink-muted)">(Contract)</span></p>
+            <ul class="resume-bullets" aria-label="Responsibilities and achievements at CVS Health as Accessibility Engineer">
+              <li>Conducted comprehensive WCAG 2.1 AA testing with screen readers (VoiceOver, NVDA, JAWS), automated tools (Axe DevTools, Lighthouse, STARK), keyboard testing, and color contrast analysis</li>
+              <li>Trained developers and QA on accessibility testing and screen reader usage to support Shift Left initiatives, complemented with comprehensive documentation</li>
+              <li>Collaborated with product owners and developers in agile environment to prioritize accessibility defects and ensure technical remediation</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Volunteer -->
+        <section id="volunteer" class="resume-section" aria-labelledby="volunteer-heading">
+          <h2 id="volunteer-heading" class="resume-section-heading">Volunteer Experience</h2>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Organizer</span>
+            </div>
+            <p class="resume-entry-org">Bay Area Accessibility and Inclusive Design Meetup</p>
+            <ul class="resume-bullets" aria-label="Volunteer work at A11y Bay">
+              <li>Organize and facilitate accessibility events with top contributors in the field for a meetup group with over 2,300 members</li>
+            </ul>
+          </div>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Speaker &amp; Mentor</span>
+            </div>
+            <ul class="resume-bullets" aria-label="Speaking and mentoring work">
+              <li>Speak about accessibility and lead assistive technology demonstrations at conferences, meetups, college classes, and UX bootcamps</li>
+              <li>Created information packet to guide people interested in growing their accessibility skillset</li>
+              <li>Meet with students and career-changers to guide them through finding a career in accessibility</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Skills -->
+        <section id="skills" class="resume-section" aria-labelledby="skills-heading">
+          <h2 id="skills-heading" class="resume-section-heading">Skills</h2>
+          <ul class="skills-grid" role="list" aria-label="Professional skills">
+            <li class="skill-chip">WCAG 2.2 / ADA / Section 508</li>
+            <li class="skill-chip">Design Systems</li>
+            <li class="skill-chip">Accessibility Strategy</li>
+            <li class="skill-chip">Design Annotations in Figma</li>
+            <li class="skill-chip">Cross-Functional Collaboration</li>
+            <li class="skill-chip">Mobile Accessibility (iOS &amp; Android)</li>
+            <li class="skill-chip">Accessibility Remediation</li>
+            <li class="skill-chip">JAWS, NVDA, VoiceOver &amp; TalkBack</li>
+            <li class="skill-chip">Inclusive Design</li>
+            <li class="skill-chip">User Experience</li>
+          </ul>
+        </section>
+
+        <!-- Education -->
+        <section id="education" class="resume-section" aria-labelledby="education-heading">
+          <h2 id="education-heading" class="resume-section-heading">Education</h2>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">UX Design Immersive</span>
+              <span class="resume-entry-date">2020</span>
+            </div>
+            <p class="resume-entry-org">General Assembly</p>
+          </div>
+
+          <div class="resume-entry">
+            <div class="resume-entry-header">
+              <span class="resume-entry-title">Bachelor of Arts, Women &amp; Gender Studies</span>
+              <span class="resume-entry-date">2015 – 2019</span>
+            </div>
+            <p class="resume-entry-org">Santa Clara University <span style="font-weight:300;color:var(--ink-muted)">— Magna Cum Laude</span></p>
+          </div>
+        </section>
+
+        <!-- Awards -->
+        <section id="awards" class="resume-section" aria-labelledby="awards-heading">
+          <h2 id="awards-heading" class="resume-section-heading">Awards</h2>
+          <ul class="awards-list" aria-label="Awards and recognition">
+            <li class="award-item">UXResults Hackathon Adobe XD Challenge Winner</li>
+            <li class="award-item">Audre Lorde Social Justice Award</li>
+            <li class="award-item">Santa Clara University Juried Art Show Photography Award</li>
+            <li class="award-item">Julie J. Boucher Award for Intellectual Freedom</li>
+            <li class="award-item">Cherry Creek Diversity Conference Award for Outstanding Efforts to Promote Respect and Understanding</li>
+            <li class="award-item">Wayne Carl Award for Outstanding Contributions to Diversity and Equity</li>
+          </ul>
+        </section>
+
+        <!-- References note -->
+        <p class="references-note" role="note">
+          References available upon request.
+        </p>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <a href="/" class="footer-wordmark" aria-label="Mali — home">Mali</a>
+    <nav aria-label="Footer navigation">
+      <ul class="footer-links" role="list">
+        <li><a href="/about">About</a></li>
+        <li><a href="/work">Work</a></li>
+        <li><a href="/resume">Resume</a></li>
+        <li><a href="mailto:mali97holmes@gmail.com">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-copy">
+      <small>Designed with accessibility at the center. &copy; <span id="year"></span> Mali Holmes.</small>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuBtn = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    menuBtn.addEventListener('click', () => {
+      const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      menuBtn.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+      if (isOpen) { mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open'); }
+      else { mobileNav.removeAttribute('hidden'); mobileNav.classList.add('open'); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        menuBtn.focus();
+      }
+    });
+    mobileNav.addEventListener('focusout', (e) => {
+      if (!mobileNav.contains(e.relatedTarget) && !menuBtn.contains(e.relatedTarget)) {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          menuBtn.setAttribute('aria-enabled', 'false');
+          menuBtn.setAttribute('aria-label', 'Open navigation menu');
+          mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        }
+      }
+    });
+
+    // Highlight active sidebar section on scroll
+    const sections = document.querySelectorAll('.resume-section[id]');
+    const sideLinks = document.querySelectorAll('.sidebar-nav a');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          sideLinks.forEach(link => {
+            link.removeAttribute('aria-current');
+            if (link.getAttribute('href') === '#' + entry.target.id) {
+              link.setAttribute('aria-current', 'true');
+            }
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+</body>
+</html>
