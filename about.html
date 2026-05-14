@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me — Mali</title>
+  <meta name="description" content="Mali is an accessibility and UX designer, a11y community organizer, whale enthusiast, and devoted dog mom to Betty the labradoodle." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --opal-teal:        #2BBFA0;
+      --opal-rose:        #D95F8A;
+      --opal-gold:        #C8860A;
+      --opal-violet:      #6B4FCC;
+      --opal-sky:         #3A9ED9;
+      --opal-teal-dark:   #1A7A68;
+      --opal-rose-dark:   #A33A65;
+      --opal-gold-dark:   #8A5C06;
+      --opal-violet-dark: #4A35A0;
+      --opal-sky-dark:    #1B6FA8;
+
+      --ink:           #111111;
+      --ink-secondary: #444444;
+      --ink-muted:     #666666;
+      --surface:       #FFFFFF;
+      --surface-soft:  #F7F7F5;
+      --border:        rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.20);
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+
+      --max-w: 1100px;
+      --prose-w: 640px;
+      --gap: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; }
+    ul, ol { list-style: none; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--ink); color: #fff;
+      padding: 0.6rem 1.2rem; border-radius: 0 0 6px 6px;
+      font-size: 0.9rem; font-weight: 500; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; outline: 3px solid var(--opal-teal); outline-offset: 2px; }
+
+    :focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; border-radius: 2px; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap);
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .wordmark {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--ink);
+    }
+    .wordmark .mali-m {
+      background: linear-gradient(135deg, var(--opal-violet) 0%, var(--opal-teal) 50%, var(--opal-rose) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .primary-nav { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-link {
+      font-size: 0.9rem; font-weight: 400; color: var(--ink-secondary);
+      text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 6px;
+      transition: color 0.15s, background 0.15s; position: relative;
+    }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--surface-soft); }
+    .nav-link[aria-current="page"] { color: var(--ink); font-weight: 500; }
+    .nav-link[aria-current="page"]::after {
+      content: ''; position: absolute; bottom: 4px; left: 0.85rem; right: 0.85rem;
+      height: 2px; background: var(--opal-teal); border-radius: 2px;
+    }
+    .nav-cta {
+      font-size: 0.875rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      padding: 0.45rem 1rem; border: 1.5px solid var(--ink); border-radius: 6px;
+      margin-left: 0.5rem; transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover, .nav-cta:focus-visible { background: var(--ink); color: var(--surface); }
+    .menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 0.5rem; color: var(--ink); border-radius: 6px;
+    }
+    .menu-btn:focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; }
+    .hamburger-icon { display: block; width: 22px; height: 16px; position: relative; }
+    .hamburger-icon span {
+      display: block; height: 2px; background: var(--ink); border-radius: 2px;
+      position: absolute; left: 0; right: 0; transition: transform 0.2s, opacity 0.2s, top 0.2s;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+    .mobile-nav {
+      display: none; flex-direction: column; padding: 1rem var(--gap) 1.5rem;
+      border-top: 1px solid var(--border); background: var(--surface);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link, .mobile-nav .nav-cta {
+      font-size: 1rem; padding: 0.65rem 0; border: none;
+      border-bottom: 1px solid var(--border); border-radius: 0; margin: 0;
+    }
+    .mobile-nav .nav-cta {
+      margin-top: 1rem; border: 1.5px solid var(--ink);
+      border-radius: 6px; text-align: center; padding: 0.65rem 1rem;
+    }
+    @media (max-width: 700px) { .primary-nav { display: none; } .menu-btn { display: block; } }
+
+    /* ── OPAL RULE ── */
+    .opal-rule { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap); }
+    .opal-rule-line {
+      height: 2px;
+      background: linear-gradient(to right, var(--opal-violet) 0%, var(--opal-teal) 33%, var(--opal-rose) 66%, var(--opal-gold) 100%);
+      border-radius: 2px; opacity: 0.65;
+    }
+
+    /* ── HERO ── */
+    .about-hero {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 8vw, 6rem) var(--gap) clamp(2rem, 5vw, 4rem);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: center;
+    }
+    @media (max-width: 720px) {
+      .about-hero { grid-template-columns: 1fr; }
+      .about-hero-visual { order: -1; }
+    }
+
+    .about-hero-label {
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.75rem; display: block;
+    }
+    .about-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+    }
+    .about-hero h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--opal-teal-dark);
+    }
+    .about-hero-intro {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--ink-secondary);
+      line-height: 1.75;
+      max-width: 480px;
+    }
+    .about-hero-intro strong { font-weight: 500; color: var(--ink); }
+
+    /* Photo placeholder / visual */
+    .about-hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .photo-frame {
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 4/5;
+      border-radius: 16px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface-soft);
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto;
+    }
+    .photo-frame img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    /* Opal shimmer placeholder when no photo */
+    .photo-placeholder {
+      width: 100%; height: 100%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(107,79,204,0.12) 0%,
+        rgba(43,191,160,0.15) 25%,
+        rgba(217,95,138,0.12) 50%,
+        rgba(200,134,10,0.10) 75%,
+        rgba(107,79,204,0.12) 100%
+      );
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--ink-muted);
+      font-size: 0.8rem;
+      font-style: italic;
+      text-align: center;
+      padding: 2rem;
+    }
+    /* Decorative accent tag on photo */
+    .photo-tag {
+      position: absolute;
+      bottom: -14px;
+      right: -10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 100px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .photo-tag-2 {
+      position: absolute;
+      top: -14px;
+      left: -10px;
+      background: var(--surface);
+      border: 1.5px solid var(--opal-teal);
+      border-radius: 100px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--opal-teal-dark);
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* ── BODY SECTIONS ── */
+    .about-body {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+      align-items: start;
+    }
+    @media (max-width: 720px) { .about-body { grid-template-columns: 1fr; } }
+
+    .about-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .about-section p {
+      font-size: 0.9875rem;
+      color: var(--ink-secondary);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .about-section p:last-child { margin-bottom: 0; }
+    .about-section a {
+      color: var(--opal-teal-dark);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .about-section a:hover, .about-section a:focus-visible {
+      color: var(--opal-violet-dark);
+    }
+
+    /* Section accent line */
+    .about-section-accent {
+      width: 32px;
+      height: 3px;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+    .accent-teal   { background: var(--opal-teal); }
+    .accent-violet { background: var(--opal-violet); }
+    .accent-rose   { background: var(--opal-rose); }
+    .accent-gold   { background: var(--opal-gold); }
+
+    /* ── OUTSIDE WORK — fun grid ── */
+    .outside-section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--gap) clamp(3rem, 7vw, 5rem);
+    }
+    .outside-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1.75rem;
+    }
+    .outside-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .outside-card {
+      border: 1.5px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 1.5rem;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .outside-card-icon {
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+    .outside-card h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .outside-card p {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      line-height: 1.6;
+    }
+    .outside-card:nth-child(1) { border-top: 3px solid var(--opal-teal); }
+    .outside-card:nth-child(2) { border-top: 3px solid var(--opal-violet); }
+    .outside-card:nth-child(3) { border-top: 3px solid var(--opal-rose); }
+    .outside-card:nth-child(4) { border-top: 3px solid var(--opal-gold); }
+
+    /* ── COMMUNITY BAND ── */
+    .community-band {
+      background: var(--surface-soft);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .community-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4rem) var(--gap);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: center;
+    }
+    @media (max-width: 660px) { .community-inner { grid-template-columns: 1fr; } }
+
+    .community-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .community-text p {
+      font-size: 0.9875rem;
+      color: var(--ink-secondary);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .community-text p:last-of-type { margin-bottom: 0; }
+    .community-text a {
+      color: var(--opal-violet-dark);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .community-text a:hover, .community-text a:focus-visible { color: var(--opal-teal-dark); }
+
+    .community-stat-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .community-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+    .community-stat-num {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .community-stat:nth-child(1) .community-stat-num { color: var(--opal-violet-dark); }
+    .community-stat:nth-child(2) .community-stat-num { color: var(--opal-teal-dark); }
+    .community-stat-label {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      line-height: 1.4;
+    }
+
+    /* ── CTA / CONTACT STRIP ── */
+    .contact-strip {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .contact-strip-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 1.8rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .contact-strip-text p { font-size: 0.95rem; color: var(--ink-secondary); }
+    .contact-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500;
+      text-decoration: none; padding: 0.7rem 1.4rem; border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+    .btn-outline:hover, .btn-outline:focus-visible { background: var(--ink); color: var(--surface); }
+    .btn-ghost-teal { background: transparent; color: var(--opal-teal-dark); border: 1.5px solid var(--opal-teal); }
+    .btn-ghost-teal:hover, .btn-ghost-teal:focus-visible { background: rgba(43,191,160,0.10); }
+    .btn-ghost-violet { background: transparent; color: var(--opal-violet-dark); border: 1.5px solid var(--opal-violet); }
+    .btn-ghost-violet:hover, .btn-ghost-violet:focus-visible { background: rgba(107,79,204,0.08); }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      max-width: var(--max-w); margin: 0 auto; padding: 2rem var(--gap);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; border-top: 1px solid var(--border);
+    }
+    .footer-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); text-decoration: none; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover, .footer-links a:focus-visible { color: var(--ink); text-decoration: underline; }
+    .footer-copy { font-size: 0.8rem; color: var(--ink-muted); width: 100%; text-align: right; }
+    @media (max-width: 540px) { .footer-copy { text-align: left; } .site-footer { flex-direction: column; align-items: flex-start; } }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="wordmark" aria-label="Mali — home">
+        <span class="mali-m" aria-hidden="true">M</span>ali
+      </a>
+      <nav aria-label="Primary navigation">
+        <ul class="primary-nav" role="list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/about" class="nav-link" aria-current="page">About Me</a></li>
+          <li><a href="/work" class="nav-link">My Work</a></li>
+          <li><a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
+        aria-label="Open navigation menu" id="menu-toggle">
+        <span class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/about" class="nav-link" aria-current="page">About Me</a></li>
+        <li><a href="/work" class="nav-link">My Work</a></li>
+      </ul>
+      <a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a>
+    </nav>
+  </header>
+
+
+  <main id="main-content" tabindex="-1">
+
+    <!-- ── HERO ── -->
+    <section class="about-hero" aria-labelledby="about-heading">
+      <div class="about-hero-text">
+        <span class="about-hero-label">About Me</span>
+        <h1 id="about-heading">
+          I make the web work<br>
+          <em>for everyone.</em>
+        </h1>
+        <p class="about-hero-intro">
+          Hi, I'm Mali — an accessibility and UX designer making digital products more
+          inclusive, more usable, and honestly just <strong>better</strong>. I've been
+          doing this work since 2020 and I genuinely love it, which probably comes through
+          in how much I talk about it.
+        </p>
+      </div>
+
+      <div class="about-hero-visual">
+        <div class="photo-frame">
+          <!-- Swap this div for an <img> tag when you have a photo ready -->
+          <div class="photo-placeholder" role="img" aria-label="Photo of Mali — coming soon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="opacity:0.3">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+            </svg>
+            <span>Photo coming soon</span>
+          </div>
+        </div>
+        <span class="photo-tag" aria-hidden="true">Bay Area based</span>
+        <span class="photo-tag-2" aria-hidden="true">Open to work</span>
+      </div>
+    </section>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- ── ABOUT BODY ── -->
+    <div class="about-body">
+
+      <section class="about-section" aria-labelledby="work-heading">
+        <div class="about-section-accent accent-teal" aria-hidden="true"></div>
+        <h2 id="work-heading">How I got here</h2>
+        <p>
+          I didn't set out to become an accessibility specialist — I stumbled into it and
+          immediately knew it was exactly what I was supposed to be doing. There's something
+          uniquely satisfying about work that sits at the intersection of design craft and
+          genuine impact on people's lives.
+        </p>
+        <p>
+          Since 2020, I've had the chance to do that work at scale — leading
+          accessibility programs at Verily and CVS Health, building annotation kits and
+          decision trees from scratch, designing inclusive patient experiences, and using
+          data to make the case that accessibility isn't a nice-to-have.
+        </p>
+        <p>
+          These days I'm expanding into broader UX design, because the skills transfer
+          beautifully: deep empathy for users, a system-level view of how products work,
+          and an instinct for where things break down.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="how-heading">
+        <div class="about-section-accent accent-violet" aria-hidden="true"></div>
+        <h2 id="how-heading">How I work</h2>
+        <p>
+          My design philosophy starts with the people who are most often left out of the
+          room when decisions get made. If I design for someone with a screen reader, a
+          motor disability, or executive dysfunction, I almost always end up with something
+          that works better for everyone.
+        </p>
+        <p>
+          I'm collaborative to the core — I do some of my best thinking in conversation,
+          and I genuinely enjoy working with engineers, product managers, and content
+          designers. I don't believe in throwing specs over a wall. Handoffs are the
+          beginning of a conversation, not the end of one.
+        </p>
+        <p>
+          I also believe in leaving things better than I found them — whether that's a
+          Figma file, a design process, or a team's understanding of accessibility.
+        </p>
+      </section>
+
+
+
+    </div>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- ── OUTSIDE WORK ── -->
+    <section class="outside-section" aria-labelledby="outside-heading">
+      <h2 id="outside-heading" style="font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--ink); margin-bottom: 1.75rem; margin-top: clamp(2.5rem, 6vw, 4rem);">
+        When I'm not designing
+      </h2>
+      <ul class="outside-grid" role="list">
+        <li class="outside-card" role="listitem">
+          <span class="outside-card-icon" aria-hidden="true">🐋</span>
+          <h3>Whale watching</h3>
+          <p>
+            Shore-based, binoculars glued to my face. From spouts to breaches, I get a
+            thrill from it all — there is nothing quite like spotting something that
+            enormous out in the wild. It resets everything.
+          </p>
+        </li>
+        <li class="outside-card" role="listitem">
+          <span class="outside-card-icon" aria-hidden="true">🐾</span>
+          <h3>Betty the labradoodle</h3>
+          <p>
+            Betty is an Australian labradoodle who loves snuggles more than anything and
+            will quickly become everyone's favorite coworker. She loves to make a guest
+            appearance in meetings. You've been warned.
+          </p>
+        </li>
+        <li class="outside-card" role="listitem">
+          <span class="outside-card-icon" aria-hidden="true">🌮</span>
+          <h3>Finding the best bites</h3>
+          <p>
+            Serious foodie with strong opinions on tacos. I love trying all kinds of
+            different foods and will absolutely never turn down an oyster happy hour.
+            Always on the hunt for the next great meal.
+          </p>
+        </li>
+        <li class="outside-card" role="listitem">
+          <span class="outside-card-icon" aria-hidden="true">🎵</span>
+          <h3>Music, always</h3>
+          <p>
+            From Taylor Swift to Tame Impala, I'm always down to talk new music and share
+            with friends. If you're lucky, you might get a friendship bracelet.
+          </p>
+        </li>
+      </ul>
+    </section>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <!-- ── COMMUNITY ── -->
+    <section class="community-band" aria-labelledby="community-heading">
+      <div class="community-inner">
+        <div class="community-text">
+          <h2 id="community-heading">Building community</h2>
+          <p>
+            Accessibility work can feel pretty isolating, especially when you're one of a
+            small handful of specialists in a large organization. In 2021, I was invited
+            to co-host
+            <a href="https://www.meetup.com/a11ybay/" target="_blank" rel="noopener noreferrer">
+              A11y Bay
+            </a>
+            — a Bay Area meetup for accessibility practitioners — and it ended up being the
+            thing that kicked off my accessibility career in a real way. Being around
+            other people who care about this work as much as I do changed everything.
+          </p>
+          <p>
+            Beyond the meetup, I mentor people who want to break into accessibility, and
+            I speak across bootcamps, universities, and master's programs to help the next
+            generation of designers understand why inclusive design matters — and how to
+            actually do it.
+          </p>
+          <p>
+            Community building is a design problem, just with people instead of pixels.
+            You have to listen carefully, reduce friction, and make sure everyone in the
+            room feels like they belong there.
+          </p>
+        </div>
+        <div class="community-stat-stack" aria-label="Community involvement highlights">
+          <div class="community-stat">
+            <span class="community-stat-num">A11y Bay</span>
+            <span class="community-stat-label">Bay Area accessibility meetup — co-host since 2021</span>
+          </div>
+          <div class="community-stat">
+            <span class="community-stat-num">1:1</span>
+            <span class="community-stat-label">Mentoring people breaking into the accessibility field</span>
+          </div>
+          <div class="community-stat">
+            <span class="community-stat-num">IRL</span>
+            <span class="community-stat-label">Speaking at bootcamps, universities, and master's programs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <div class="contact-strip">
+      <div class="contact-strip-text">
+        <h2>Want to work together?</h2>
+        <p>I'm open to full-time and contract roles in accessibility and UX design.</p>
+      </div>
+      <div class="contact-actions">
+        <a href="mailto:hello@mali.design" class="btn btn-outline">Get in touch</a>
+        <a href="/work" class="btn btn-ghost-teal">See my work</a>
+        <a href="https://www.meetup.com/a11ybay/" target="_blank" rel="noopener noreferrer"
+          class="btn btn-ghost-violet" aria-label="A11y Bay meetup group (opens in new tab)">
+          Join A11y Bay
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <a href="/" class="footer-wordmark" aria-label="Mali — home">Mali</a>
+    <nav aria-label="Footer navigation">
+      <ul class="footer-links" role="list">
+        <li><a href="/about">About</a></li>
+        <li><a href="/work">Work</a></li>
+        <li><a href="/resume.pdf" aria-label="Resume (PDF)">Resume</a></li>
+        <li><a href="mailto:hello@mali.design">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-copy">
+      <small>Designed with accessibility at the center. &copy; <span id="year"></span> Mali.</small>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuBtn = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    menuBtn.addEventListener('click', () => {
+      const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      menuBtn.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+      if (isOpen) { mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open'); }
+      else { mobileNav.removeAttribute('hidden'); mobileNav.classList.add('open'); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        menuBtn.focus();
+      }
+    });
+    mobileNav.addEventListener('focusout', (e) => {
+      if (!mobileNav.contains(e.relatedTarget) && !menuBtn.contains(e.relatedTarget)) {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.setAttribute('aria-label', 'Open navigation menu');
+          mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
