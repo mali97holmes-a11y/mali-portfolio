@@ -727,7 +727,7 @@
           <li><a href="/" class="nav-link">Home</a></li>
           <li><a href="/about" class="nav-link">About Me</a></li>
           <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
-          <li><a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a></li>
+          <li><a href="/resume" class="nav-cta" aria-label="View resume">Resume</a></li>
         </ul>
       </nav>
       <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
@@ -743,7 +743,7 @@
         <li><a href="/about" class="nav-link">About Me</a></li>
         <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
       </ul>
-      <a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a>
+      <a href="/resume" class="nav-cta" aria-label="View resume">Resume</a>
     </nav>
   </header>
 
@@ -1043,12 +1043,25 @@
           </p>
 
           <figure>
-            <div class="cs-img-placeholder" role="img" aria-label="Decision tree iterations placeholder">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                <path d="M3 6h18M3 12h12M3 18h8"/><circle cx="19" cy="12" r="2"/><circle cx="15" cy="18" r="2"/><path d="M19 14v2M17 18h-2"/>
-              </svg>
-              <figcaption>Add screenshots of your decision tree iterations here — early complex version vs. final component-level trees.</figcaption>
-            </div>
+            <img
+              src="../images/decision-tree-v1.png"
+              alt="First iteration of an annotations decision tree, showing hundreds of sticky notes with many long, complex user flows"
+              width="1536"
+              height="490"
+              loading="lazy"
+            />
+            <figcaption>First iteration of the decision tree — the full scope made it easy for designers to lose their place, which drove the decision to break it into smaller, component-level trees.</figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="../images/decision-tree-headings-final.png"
+              alt="Mobile and web decision trees for headings, showing a clean flow with 2 to 3 steps"
+              width="829"
+              height="700"
+              loading="lazy"
+            />
+            <figcaption>Final iteration — the headings decision tree, broken into separate web and mobile flows. Each tree is compact enough to paste directly into a design file.</figcaption>
           </figure>
         </section>
 
@@ -1116,7 +1129,7 @@
       <ul class="footer-links" role="list">
         <li><a href="/about">About</a></li>
         <li><a href="/work">Work</a></li>
-        <li><a href="/resume.pdf" aria-label="Resume (PDF)">Resume</a></li>
+        <li><a href="/resume">Resume</a></li>
         <li><a href="mailto:hello@mali.design">Contact</a></li>
       </ul>
     </nav>
