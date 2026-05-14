@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reducing Accessibility Defects Through Data — Mali</title>
+  <meta name="description" content="How Mali built Jira dashboards and a defect refinement process at Verily that prevented 144 accessibility bugs and saved an estimated $181k over 7 months." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --opal-teal:        #2BBFA0;
+      --opal-rose:        #D95F8A;
+      --opal-gold:        #C8860A;
+      --opal-violet:      #6B4FCC;
+      --opal-sky:         #3A9ED9;
+      --opal-teal-dark:   #1A7A68;
+      --opal-rose-dark:   #A33A65;
+      --opal-gold-dark:   #8A5C06;
+      --opal-violet-dark: #4A35A0;
+      --opal-sky-dark:    #1B6FA8;
+
+      --ink:          #111111;
+      --ink-secondary:#444444;
+      --ink-muted:    #666666;
+      --surface:      #FFFFFF;
+      --surface-soft: #F7F7F5;
+      --border:       rgba(0,0,0,0.10);
+      --border-strong:rgba(0,0,0,0.20);
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+
+      --max-w:   1100px;
+      --prose-w: 680px;
+      --gap:     clamp(1.5rem, 4vw, 3rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; }
+    ul, ol { list-style: none; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--ink); color: #fff;
+      padding: 0.6rem 1.2rem; border-radius: 0 0 6px 6px;
+      font-size: 0.9rem; font-weight: 500; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; outline: 3px solid var(--opal-teal); outline-offset: 2px; }
+
+    :focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; border-radius: 2px; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap);
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .wordmark {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--ink);
+    }
+    .wordmark .mali-m {
+      background: linear-gradient(135deg, var(--opal-violet) 0%, var(--opal-teal) 50%, var(--opal-rose) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .primary-nav { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-link {
+      font-size: 0.9rem; font-weight: 400; color: var(--ink-secondary);
+      text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 6px;
+      transition: color 0.15s, background 0.15s; position: relative;
+    }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--surface-soft); }
+    .nav-link[aria-current="page"] { color: var(--ink); font-weight: 500; }
+    .nav-link[aria-current="page"]::after {
+      content: ''; position: absolute; bottom: 4px; left: 0.85rem; right: 0.85rem;
+      height: 2px; background: var(--opal-teal); border-radius: 2px;
+    }
+    .nav-cta {
+      font-size: 0.875rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      padding: 0.45rem 1rem; border: 1.5px solid var(--ink); border-radius: 6px;
+      margin-left: 0.5rem; transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover, .nav-cta:focus-visible { background: var(--ink); color: var(--surface); }
+    .menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 0.5rem; color: var(--ink); border-radius: 6px;
+    }
+    .menu-btn:focus-visible { outline: 3px solid var(--opal-violet); outline-offset: 3px; }
+    .hamburger-icon { display: block; width: 22px; height: 16px; position: relative; }
+    .hamburger-icon span {
+      display: block; height: 2px; background: var(--ink); border-radius: 2px;
+      position: absolute; left: 0; right: 0; transition: transform 0.2s, opacity 0.2s, top 0.2s;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .hamburger-icon span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+    .mobile-nav {
+      display: none; flex-direction: column; padding: 1rem var(--gap) 1.5rem;
+      border-top: 1px solid var(--border); background: var(--surface);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link, .mobile-nav .nav-cta {
+      font-size: 1rem; padding: 0.65rem 0; border: none;
+      border-bottom: 1px solid var(--border); border-radius: 0; margin: 0;
+    }
+    .mobile-nav .nav-cta {
+      margin-top: 1rem; border: 1.5px solid var(--ink); border-radius: 6px;
+      text-align: center; padding: 0.65rem 1rem;
+    }
+    @media (max-width: 700px) { .primary-nav { display: none; } .menu-btn { display: block; } }
+
+    /* ── OPAL RULE ── */
+    .opal-rule { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gap); }
+    .opal-rule-line {
+      height: 2px;
+      background: linear-gradient(to right, var(--opal-violet) 0%, var(--opal-teal) 33%, var(--opal-rose) 66%, var(--opal-gold) 100%);
+      border-radius: 2px; opacity: 0.65;
+    }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb { max-width: var(--max-w); margin: 0 auto; padding: 1.25rem var(--gap) 0; }
+    .breadcrumb ol {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
+      list-style: none; font-size: 0.825rem; color: var(--ink-muted);
+    }
+    .breadcrumb li + li::before { content: '/'; margin-right: 0.35rem; color: var(--border-strong); }
+    .breadcrumb a { color: var(--ink-muted); text-decoration: none; }
+    .breadcrumb a:hover, .breadcrumb a:focus-visible { color: var(--ink); text-decoration: underline; }
+    .breadcrumb [aria-current="page"] { color: var(--ink); }
+
+    /* ── CASE STUDY HERO ── */
+    .cs-hero {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4.5rem) var(--gap) clamp(2rem, 5vw, 3.5rem);
+    }
+    .cs-org-label {
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--opal-violet-dark); margin-bottom: 0.75rem; display: block;
+    }
+    .cs-title {
+      font-family: var(--font-display); font-size: clamp(2rem, 5.5vw, 3.5rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+      color: var(--ink); max-width: 760px; margin-bottom: 1.25rem;
+    }
+    .cs-subtitle {
+      font-size: clamp(1rem, 2vw, 1.15rem); font-weight: 300;
+      color: var(--ink-secondary); max-width: 600px; line-height: 1.65;
+    }
+    .cs-meta {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0; margin-top: 2.5rem;
+      border: 1px solid var(--border-strong); border-radius: 10px;
+      overflow: hidden; max-width: 780px;
+    }
+    .cs-meta-item { padding: 1rem 1.25rem; border-right: 1px solid var(--border); }
+    .cs-meta-item:last-child { border-right: none; }
+    @media (max-width: 600px) {
+      .cs-meta { grid-template-columns: 1fr 1fr; }
+      .cs-meta-item:nth-child(2) { border-right: none; }
+      .cs-meta-item:nth-child(3) { border-top: 1px solid var(--border); }
+      .cs-meta-item:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
+    }
+    .cs-meta-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.3rem;
+    }
+    .cs-meta-value { font-size: 0.875rem; font-weight: 400; color: var(--ink); line-height: 1.4; }
+
+    /* ── IMPACT BAR ── */
+    .impact-bar { background: var(--surface-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .impact-bar-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 2rem var(--gap);
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;
+    }
+    .impact-stat { display: flex; flex-direction: column; gap: 0.3rem; }
+    .impact-num { font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; line-height: 1; }
+    .impact-stat:nth-child(1) .impact-num { color: var(--opal-teal-dark); }
+    .impact-stat:nth-child(2) .impact-num { color: var(--opal-violet-dark); }
+    .impact-stat:nth-child(3) .impact-num { color: var(--opal-gold-dark); }
+    .impact-desc { font-size: 0.875rem; color: var(--ink-secondary); line-height: 1.5; }
+
+    /* ── BODY LAYOUT ── */
+    .cs-body {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) var(--gap);
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 0 4rem; align-items: start;
+    }
+    @media (max-width: 860px) { .cs-body { grid-template-columns: 1fr; gap: 0; } .cs-toc { display: none; } }
+
+    /* ── TOC ── */
+    .cs-toc { position: sticky; top: 84px; align-self: start; }
+    .cs-toc-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.75rem;
+    }
+    .cs-toc ol { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
+    .cs-toc a {
+      display: block; font-size: 0.8rem; color: var(--ink-muted); text-decoration: none;
+      padding: 0.3rem 0.6rem; border-left: 2px solid var(--border);
+      border-radius: 0 4px 4px 0; transition: color 0.15s, border-color 0.15s; line-height: 1.4;
+    }
+    .cs-toc a:hover, .cs-toc a:focus-visible { color: var(--ink); border-left-color: var(--opal-violet); }
+    .cs-toc a[aria-current="true"] { color: var(--ink); border-left-color: var(--opal-violet); font-weight: 500; }
+
+    /* ── PROSE ── */
+    .cs-prose { min-width: 0; }
+    .cs-section { margin-bottom: clamp(3rem, 7vw, 5rem); scroll-margin-top: 84px; }
+    .cs-section-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.6rem;
+    }
+    .cs-section h2 {
+      font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 700; line-height: 1.2; color: var(--ink); margin-bottom: 1.25rem;
+    }
+    .cs-section h3 {
+      font-family: var(--font-display); font-size: 1.15rem; font-weight: 700;
+      color: var(--ink); margin-top: 2rem; margin-bottom: 0.75rem;
+    }
+    .cs-section p {
+      font-size: 1rem; color: var(--ink-secondary); line-height: 1.8;
+      max-width: var(--prose-w); margin-bottom: 1.1rem;
+    }
+    .cs-section p:last-child { margin-bottom: 0; }
+
+    .pull-quote {
+      border-left: 3px solid var(--opal-violet);
+      padding: 0.75rem 1.25rem; margin: 2rem 0;
+      background: rgba(107,79,204,0.05); border-radius: 0 8px 8px 0;
+    }
+    .pull-quote p {
+      font-family: var(--font-display); font-size: 1.1rem; font-style: italic;
+      font-weight: 300; color: var(--ink); margin: 0; max-width: 560px;
+    }
+
+    .insight-box {
+      border: 1.5px solid var(--border-strong); border-radius: 10px;
+      padding: 1.25rem 1.5rem; margin: 2rem 0; background: var(--surface-soft);
+    }
+    .insight-box-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--opal-violet-dark); margin-bottom: 0.5rem;
+    }
+    .insight-box p { font-size: 0.9375rem; color: var(--ink); line-height: 1.7; max-width: none; margin: 0; }
+
+    /* Three-column finding cards */
+    .finding-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .finding-card {
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.25rem;
+      background: var(--surface);
+    }
+    .finding-card-q {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .finding-card-a {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      line-height: 1.6;
+    }
+    .finding-card:nth-child(1) { border-top: 3px solid var(--opal-teal); }
+    .finding-card:nth-child(2) { border-top: 3px solid var(--opal-violet); }
+    .finding-card:nth-child(3) { border-top: 3px solid var(--opal-rose); }
+
+    /* Lifecycle diagram — pure HTML/CSS */
+    .lifecycle {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin: 2rem 0;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .lifecycle-step {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    .lifecycle-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .lifecycle-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      background: var(--surface-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .lifecycle-circle.active {
+      border-color: var(--opal-violet);
+      background: rgba(107,79,204,0.07);
+    }
+    .lifecycle-label {
+      font-size: 0.72rem;
+      color: var(--ink-secondary);
+      text-align: center;
+      max-width: 80px;
+      line-height: 1.3;
+    }
+    .lifecycle-label.active { color: var(--opal-violet-dark); font-weight: 500; }
+    .lifecycle-arrow {
+      width: 28px;
+      height: 2px;
+      background: var(--border-strong);
+      position: relative;
+      flex-shrink: 0;
+      margin: 0 2px;
+      margin-bottom: 22px;
+    }
+    .lifecycle-arrow::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: -4px;
+      border: 4px solid transparent;
+      border-left: 6px solid var(--border-strong);
+    }
+
+    /* Process steps */
+    .process-steps { display: flex; flex-direction: column; gap: 1.25rem; margin: 1.5rem 0; }
+    .process-step { display: grid; grid-template-columns: 2rem 1fr; gap: 1rem; align-items: start; }
+    .process-step-num {
+      width: 2rem; height: 2rem; border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 500; color: var(--ink-muted);
+      flex-shrink: 0; margin-top: 0.1rem;
+    }
+    .process-step-content strong { display: block; font-size: 0.9375rem; font-weight: 500; color: var(--ink); margin-bottom: 0.2rem; }
+    .process-step-content p { font-size: 0.875rem; color: var(--ink-secondary); line-height: 1.65; margin: 0; max-width: none; }
+
+    /* Big numbers row */
+    .numbers-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    @media (max-width: 560px) { .numbers-row { grid-template-columns: 1fr; } }
+    .number-card {
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .number-card-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .number-card:nth-child(1) .number-card-num { color: var(--opal-teal-dark); }
+    .number-card:nth-child(2) .number-card-num { color: var(--opal-violet-dark); }
+    .number-card:nth-child(3) .number-card-num { color: var(--opal-gold-dark); }
+    .number-card-label { font-size: 0.825rem; color: var(--ink-secondary); line-height: 1.5; }
+    .number-card-note { font-size: 0.75rem; color: var(--ink-muted); line-height: 1.4; font-style: italic; }
+
+    /* Future goals */
+    .goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .goal-card {
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      background: var(--surface-soft);
+    }
+    .goal-card strong {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+    .goal-card p { font-size: 0.825rem; color: var(--ink-secondary); line-height: 1.55; margin: 0; max-width: none; }
+
+    figure { margin: 2rem 0; }
+    figure img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+    figcaption { font-size: 0.8rem; color: var(--ink-muted); font-style: italic; margin-top: 0.6rem; line-height: 1.5; }
+
+    .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0; }
+    .chip { font-size: 0.8rem; padding: 0.3rem 0.75rem; border-radius: 100px; border: 1px solid var(--border-strong); color: var(--ink); background: transparent; }
+    .chip-teal   { border-color: var(--opal-teal);   color: var(--opal-teal-dark); }
+    .chip-violet { border-color: var(--opal-violet);  color: var(--opal-violet-dark); }
+    .chip-rose   { border-color: var(--opal-rose);    color: var(--opal-rose-dark); }
+    .chip-gold   { border-color: var(--opal-gold);    color: var(--opal-gold-dark); }
+
+    /* ── CASE STUDY NAV ── */
+    .cs-nav {
+      border-top: 1px solid var(--border); max-width: var(--max-w); margin: 0 auto;
+      padding: 2.5rem var(--gap); display: flex; justify-content: space-between;
+      align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .cs-nav-back a {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.9rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      padding: 0.6rem 1rem; border: 1.5px solid var(--ink); border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .cs-nav-back a:hover, .cs-nav-back a:focus-visible { background: var(--ink); color: var(--surface); }
+    .cs-nav-prev { text-align: left; }
+    .cs-nav-prev-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.25rem;
+    }
+    .cs-nav-prev a { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .cs-nav-prev a:hover, .cs-nav-prev a:focus-visible { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      max-width: var(--max-w); margin: 0 auto; padding: 2rem var(--gap);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem; border-top: 1px solid var(--border);
+    }
+    .footer-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); text-decoration: none; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover, .footer-links a:focus-visible { color: var(--ink); text-decoration: underline; }
+    .footer-copy { font-size: 0.8rem; color: var(--ink-muted); width: 100%; text-align: right; }
+    @media (max-width: 540px) { .footer-copy { text-align: left; } .site-footer { flex-direction: column; align-items: flex-start; } }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="wordmark" aria-label="Mali — home">
+        <span class="mali-m" aria-hidden="true">M</span>ali
+      </a>
+      <nav aria-label="Primary navigation">
+        <ul class="primary-nav" role="list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/about" class="nav-link">About Me</a></li>
+          <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+          <li><a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-nav"
+        aria-label="Open navigation menu" id="menu-toggle">
+        <span class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/about" class="nav-link">About Me</a></li>
+        <li><a href="/work" class="nav-link" aria-current="page">My Work</a></li>
+      </ul>
+      <a href="/resume.pdf" class="nav-cta" aria-label="View resume (opens PDF)">Resume</a>
+    </nav>
+  </header>
+
+
+  <main id="main-content" tabindex="-1">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/work">My Work</a></li>
+        <li><span aria-current="page">Reducing Accessibility Defects Through Data</span></li>
+      </ol>
+    </nav>
+
+    <header class="cs-hero">
+      <span class="cs-org-label">Verily</span>
+      <h1 class="cs-title">Reducing Accessibility Defects Through Data</h1>
+      <p class="cs-subtitle">
+        Building Jira dashboards and a defect refinement process that made accessibility
+        bugs visible, traceable, and preventable — across an enterprise product organization.
+      </p>
+
+      <dl class="cs-meta" aria-label="Project details">
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">My Role</dt>
+          <dd class="cs-meta-value">Project Lead</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Timeline</dt>
+          <dd class="cs-meta-value">Aug 2025 – Present</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Team</dt>
+          <dd class="cs-meta-value">2 Accessibility UX Specialists</dd>
+        </div>
+        <div class="cs-meta-item">
+          <dt class="cs-meta-label">Tools</dt>
+          <dd class="cs-meta-value">Jira, Figma</dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <section aria-labelledby="impact-heading">
+      <h2 id="impact-heading" class="sr-only">Project outcomes</h2>
+      <div class="impact-bar">
+        <div class="impact-bar-inner">
+          <div class="impact-stat">
+            <span class="impact-num">144</span>
+            <p class="impact-desc">accessibility bugs prevented over 7 months</p>
+          </div>
+          <div class="impact-stat">
+            <span class="impact-num">720 hrs</span>
+            <p class="impact-desc">estimated engineering time saved</p>
+          </div>
+          <div class="impact-stat">
+            <span class="impact-num">$181k</span>
+            <p class="impact-desc">estimated cost savings based on Verily base salary</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="opal-rule" aria-hidden="true"><div class="opal-rule-line"></div></div>
+
+    <div class="cs-body">
+
+      <aside class="cs-toc" aria-label="Case study sections">
+        <p class="cs-toc-label">Contents</p>
+        <ol role="list">
+          <li><a href="#background">Background</a></li>
+          <li><a href="#defect-refinement">Defect Refinement</a></li>
+          <li><a href="#deeper-data">Diving Deeper</a></li>
+          <li><a href="#lifecycle">Closing the Loop</a></li>
+          <li><a href="#impact">Impact</a></li>
+          <li><a href="#future">Future Goals</a></li>
+        </ol>
+      </aside>
+
+      <article class="cs-prose" aria-label="Case study">
+
+        <!-- BACKGROUND -->
+        <section id="background" class="cs-section" aria-labelledby="background-heading">
+          <p class="cs-section-label">Context</p>
+          <h2 id="background-heading">Background</h2>
+          <p>
+            With two accessibility UX specialists supporting an enterprise product organization,
+            we had solid upstream processes — accessibility reviews, annotations, and handoffs
+            to developers. But we had a blind spot: we didn't know what was happening after
+            development. Were annotations being followed? Were bugs coming from design decisions
+            or engineering implementation? Were they even being categorized correctly?
+          </p>
+
+          <p>
+            The A11y UX product lifecycle had clear steps at the start, but the back half was
+            full of unknowns.
+          </p>
+
+          <!-- Lifecycle diagram -->
+          <div role="img" aria-label="Accessibility UX product lifecycle showing five stages: Accessibility Review and Annotations, Handoff to developers, then two unknown stages, then Accessibility Testing">
+            <div class="lifecycle" aria-hidden="true">
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Accessibility Review &amp; Annotations</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6L2 12l6 6"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Handoff to developers</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle">
+                    <span style="font-size:0.9rem;color:var(--ink-muted)">???</span>
+                  </div>
+                  <span class="lifecycle-label">Unknown</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                  </div>
+                  <span class="lifecycle-label">Accessibility Testing</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle">
+                    <span style="font-size:0.9rem;color:var(--ink-muted)">???</span>
+                  </div>
+                  <span class="lifecycle-label">Unknown</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="insight-box" role="note">
+            <p class="insight-box-label">The gap</p>
+            <p>
+              We had good processes at the start of the lifecycle but no visibility into what happened after handoff. Without data, we couldn't tell if our upstream work was actually reducing bugs downstream.
+            </p>
+          </div>
+        </section>
+
+        <!-- DEFECT REFINEMENT -->
+        <section id="defect-refinement" class="cs-section" aria-labelledby="refinement-heading">
+          <p class="cs-section-label">Process Design</p>
+          <h2 id="refinement-heading">Defect Refinement</h2>
+          <p>
+            I started by establishing a weekly defect refinement process. The goal was simple:
+            get the team aligned on what was coming out of accessibility testing, where bugs
+            were originating, and whether we agreed on solutions.
+          </p>
+
+          <div class="finding-cards" role="list" aria-label="Key questions the refinement process answered">
+            <div class="finding-card" role="listitem">
+              <p class="finding-card-q">Where were bugs coming from?</p>
+              <p class="finding-card-a">Were accessibility issues originating in design decisions or engineering implementation?</p>
+            </div>
+            <div class="finding-card" role="listitem">
+              <p class="finding-card-q">Were bugs categorized correctly?</p>
+              <p class="finding-card-a">Were Jira tickets mapped to the right WCAG Success Criteria?</p>
+            </div>
+            <div class="finding-card" role="listitem">
+              <p class="finding-card-q">Did we agree on solutions?</p>
+              <p class="finding-card-a">Were the design and engineering teams aligned on how to fix each issue?</p>
+            </div>
+          </div>
+
+          <h3>What we learned from refinement</h3>
+          <p>
+            The weekly reviews surfaced three immediate benefits. First, we aligned as a team
+            on defect templates, how to categorize bugs, and what kinds of solutions we should
+            push for — creating consistency that hadn't existed before.
+          </p>
+          <p>
+            Second, reviewing bugs every week gave us a live window into how our products were
+            performing. We could see, week by week, whether our upstream accessibility work was
+            making an impact.
+          </p>
+
+          <div class="pull-quote">
+            <p>"Reviewing bugs every week gave insight into how our products were performing, so we could see if our contribution was making an impact."</p>
+          </div>
+
+          <p>
+            Third — a useful lesson in process design — we discovered the synchronous weekly
+            meeting wasn't the right format with offshore teams. We moved to an asynchronous
+            review model, which worked better for everyone and freed up meeting time.
+          </p>
+        </section>
+
+        <!-- DIVING DEEPER -->
+        <section id="deeper-data" class="cs-section" aria-labelledby="deeper-heading">
+          <p class="cs-section-label">Data Strategy</p>
+          <h2 id="deeper-heading">Diving Deeper Into the Data</h2>
+          <p>
+            After a few weeks of refinement reviews, I noticed we were sitting on richer data
+            than we were using. The bugs themselves were telling a story — but only if we
+            captured the right fields.
+          </p>
+          <p>
+            I added root cause tracking to Jira tickets. This single change gave me a way to
+            identify systemic gaps in accessibility practice and track progress in closing them
+            over time.
+          </p>
+
+          <div class="insight-box" role="note">
+            <p class="insight-box-label">The insight</p>
+            <p>
+              Root cause data turned a list of bugs into a feedback loop. When a spike appeared,
+              I could immediately identify whether it came from annotations not being followed,
+              annotations not being included, or missing/incorrect information — and respond with
+              a targeted intervention.
+            </p>
+          </div>
+
+          <h3>Three root causes, three responses</h3>
+
+          <div class="process-steps" role="list" aria-label="Root causes and responses">
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">1</span>
+              <div class="process-step-content">
+                <strong>Annotations were not followed</strong>
+                <p>Response: followed up with designers and developers, implemented handoff calls, led targeted annotation trainings.</p>
+              </div>
+            </div>
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">2</span>
+              <div class="process-step-content">
+                <strong>Annotations were not included</strong>
+                <p>Response: followed up with designers, improved communication around fast follows, included annotations as a requirement in UX tickets.</p>
+              </div>
+            </div>
+            <div class="process-step" role="listitem">
+              <span class="process-step-num" aria-hidden="true">3</span>
+              <div class="process-step-content">
+                <strong>Annotations had missing or incorrect information</strong>
+                <p>Response: treated each instance as a learning opportunity, updated the annotation kit to close the gap.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CLOSING THE LOOP -->
+        <section id="lifecycle" class="cs-section" aria-labelledby="lifecycle-heading">
+          <p class="cs-section-label">System Design</p>
+          <h2 id="lifecycle-heading">Closing the Loop</h2>
+          <p>
+            With defect refinement and root cause tracking in place, the A11y UX lifecycle
+            finally had a complete feedback loop. The two unknown stages became Implementation
+            Support — a new touchpoint where accessibility specialists help developers during
+            build — and a weekly bug list that connected testing outcomes back to upstream practice.
+          </p>
+
+          <div role="img" aria-label="Complete accessibility UX product lifecycle: Accessibility Review and Annotations, Handoff to developers, Implementation Support, Accessibility Testing, Weekly Bug List to measure performance">
+            <div class="lifecycle" aria-hidden="true">
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Accessibility Review &amp; Annotations</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6L2 12l6 6"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Handoff to developers</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Implementation Support</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Accessibility Testing</span>
+                </div>
+                <div class="lifecycle-arrow" aria-hidden="true"></div>
+              </div>
+              <div class="lifecycle-step">
+                <div class="lifecycle-node">
+                  <div class="lifecycle-circle active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                  </div>
+                  <span class="lifecycle-label active">Weekly Bug List to measure performance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p>
+            The lifecycle diagram above shows the before and after. Every stage now has a clear
+            owner, a clear output, and a connection to the next step — including a feedback loop
+            back to annotations when root cause analysis reveals gaps.
+          </p>
+        </section>
+
+        <!-- IMPACT -->
+        <section id="impact" class="cs-section" aria-labelledby="impact-section-heading">
+          <p class="cs-section-label">Results</p>
+          <h2 id="impact-section-heading">Impact</h2>
+          <p>
+            The results were immediate. After implementing the defect refinement process, I saw
+            a sharp decrease in bugs. The data made it easy to identify and address the cause of
+            any spikes — and to demonstrate the value of the process over time.
+          </p>
+          <p>
+            The average number of bugs per month was 3.4. Removing December and January —
+            which had explainable spikes — brought that average below one bug per month.
+          </p>
+
+          <div class="numbers-row" role="list" aria-label="Impact metrics">
+            <div class="number-card" role="listitem">
+              <span class="number-card-num">144</span>
+              <span class="number-card-label">bugs prevented compared to teams not using this process</span>
+              <span class="number-card-note">Measured over 7 months on Enterprise</span>
+            </div>
+            <div class="number-card" role="listitem">
+              <span class="number-card-num">720 hrs</span>
+              <span class="number-card-label">estimated engineering time saved</span>
+              <span class="number-card-note">Assuming ~5 hours to fix the average bug</span>
+            </div>
+            <div class="number-card" role="listitem">
+              <span class="number-card-num">$181k</span>
+              <span class="number-card-label">estimated cost savings</span>
+              <span class="number-card-note">Based on Verily base engineering salary</span>
+            </div>
+          </div>
+
+          <div class="chip-row" aria-label="Methods and outcomes">
+            <span class="chip chip-teal">Jira dashboards</span>
+            <span class="chip chip-violet">Root cause tracking</span>
+            <span class="chip chip-rose">Defect refinement process</span>
+            <span class="chip chip-gold">Cross-functional alignment</span>
+          </div>
+        </section>
+
+        <!-- FUTURE GOALS -->
+        <section id="future" class="cs-section" aria-labelledby="future-heading">
+          <p class="cs-section-label">What's Next</p>
+          <h2 id="future-heading">Future Goals</h2>
+          <p>
+            This process is working — and there's a clear path to making it work even harder.
+          </p>
+
+          <div class="goals-grid" role="list" aria-label="Future goals">
+            <div class="goal-card" role="listitem">
+              <strong>More consistent data over time</strong>
+              <p>Continued data collection will build a more complete picture of the process's long-term impact on reducing accessibility defects.</p>
+            </div>
+            <div class="goal-card" role="listitem">
+              <strong>Expand to engineering bugs</strong>
+              <p>The current process only covers design-origin bugs. A parallel track for engineering will capture the full picture.</p>
+            </div>
+            <div class="goal-card" role="listitem">
+              <strong>Roll out across Verily</strong>
+              <p>Right now this is Enterprise-only. Adopting the process org-wide will create significantly more impact at scale.</p>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+
+  </main>
+
+  <nav class="cs-nav" aria-label="Case study navigation">
+    <div class="cs-nav-back">
+      <a href="/work">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+          <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        All work
+      </a>
+    </div>
+    <div class="cs-nav-prev">
+      <p class="cs-nav-prev-label">Previous case study</p>
+      <a href="/work/annotations-and-decision-trees">← Annotation Kit &amp; Decision Trees</a>
+    </div>
+  </nav>
+
+  <footer class="site-footer" role="contentinfo">
+    <a href="/" class="footer-wordmark" aria-label="Mali — home">Mali</a>
+    <nav aria-label="Footer navigation">
+      <ul class="footer-links" role="list">
+        <li><a href="/about">About</a></li>
+        <li><a href="/work">Work</a></li>
+        <li><a href="/resume.pdf" aria-label="Resume (PDF)">Resume</a></li>
+        <li><a href="mailto:hello@mali.design">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-copy">
+      <small>Designed with accessibility at the center. &copy; <span id="year"></span> Mali.</small>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuBtn = document.getElementById('menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    menuBtn.addEventListener('click', () => {
+      const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      menuBtn.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+      if (isOpen) { mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open'); }
+      else { mobileNav.removeAttribute('hidden'); mobileNav.classList.add('open'); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        menuBtn.focus();
+      }
+    });
+    mobileNav.addEventListener('focusout', (e) => {
+      if (!mobileNav.contains(e.relatedTarget) && !menuBtn.contains(e.relatedTarget)) {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.setAttribute('aria-label', 'Open navigation menu');
+          mobileNav.setAttribute('hidden', ''); mobileNav.classList.remove('open');
+        }
+      }
+    });
+
+    const sections = document.querySelectorAll('.cs-section[id]');
+    const tocLinks = document.querySelectorAll('.cs-toc a');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(link => {
+            link.removeAttribute('aria-current');
+            if (link.getAttribute('href') === '#' + entry.target.id) {
+              link.setAttribute('aria-current', 'true');
+            }
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+</body>
+</html>
